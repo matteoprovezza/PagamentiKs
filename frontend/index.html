@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - KARATE SAN</title>
+    <link rel="stylesheet" href="src/styles.css">
+    <script src="src/api.js"></script>
+    <script src="src/dashboard.js"></script>
+</head>
+<body>
+    <div id="app">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>KARATE SAN</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="active">
+                        <a href="index.html">Dashboard</a>
+                    </li>
+                    <li>
+                        <a href="atleti.html">Gestione Atleti</a>
+                    </li>
+                    <li>
+                        <a href="pagamenti.html">Pagamenti</a>
+                    </li>
+                    <li>
+                        <a href="dashboard.html">Resoconti 730</a>
+                    </li>
+                </ul>
+            </nav>
+
+        </div>
+
+        <div class="dashboard">
+            <div class="dashboard-header">
+                <h1>Benvenuto, Direttivo</h1>
+            </div>
+            
+            <div class="dashboard-content">
+                <div class="dashboard-stats">
+                    <div class="stat-card">
+                        <h3>TOTALE ATLETI</h3>
+                        <span id="totalAthletes">Caricamento...</span>
+                    </div>
+                    <div class="stat-card">
+                        <h3>ENTRATE 2025</h3>
+                        <span id="revenue2025">Caricamento...</span>
+                    </div>
+                    <div class="stat-card">
+                        <h3>RICEVUTE DA GENERARE</h3>
+                        <span id="receiptsToGenerate">Caricamento...</span>
+                    </div>
+                </div>
+                
+                <div class="dashboard-section">
+                    <h2>Certificati Medici in Scadenza (30 giorni)</h2>
+                    <div id="expiringCertificates" class="certificates-container">
+                        <div class="loading">Caricamento in corso...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

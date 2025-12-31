@@ -1,0 +1,152 @@
+spring:
+  application:
+    name: pagamenti-ks
+  
+  # Configurazione del database SQLite
+  datasource:
+    url: jdbc:sqlite:${user.home}/.pagamenti-ks/database.db
+    driver-class-name: org.sqlite.JDBC
+    username: 
+    password: 
+    hikari:
+      maximum-pool-size: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+  
+  # Configurazione JPA/Hibernate
+  jpa:
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.community.dialect.SQLiteDialect
+        format_sql: true
+    defer-datasource-initialization: true
+  
+  # Configurazione server
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  
+  # Configurazione sicurezza
+  security:
+    jwt:
+      secret: ${JWT_SECRET:your-256-bit-secret}
+      expiration: 86400000 # 24 ore in millisecondi
+      refresh-expiration: 604800000 # 7 giorni in millisecondi
+
+# Configurazione logging
+logging:
+  level:
+    root: INFO
+    org.springframework: INFO
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    com.pagamenti.ks: DEBUG
+  file:
+    name: ${user.home}/.pagamenti-ks/logs/application.log
+    max-size: 10MB
+    max-history: 7
+    total-size-cap: 100MB
+
+# Configurazione OpenAPI/Swagger
+docs:
+  api-docs: /v3/api-docs
+  swagger-ui: /swagger-ui.html
+  path: /api-docs
+  version: 1.0.0
+  title: Pagamenti KS API
+  description: API per la gestione dei pagamenti
+  contact-name: Supporto
+  contact-email: supporto@pagamenti.it
+  license: Proprietary
+  license-url: https://www.pagamenti.it/license
+
+# Configurazione CORS
+cors:
+  allowed-origins: "*"
+  allowed-methods: "*"
+  allowed-headers: "*"
+  exposed-headers: "Authorization,Content-Disposition"
+  allow-credentials: true
+  max-age: 3600
+
+# Configurazione Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,info,metrics"
+  endpoint:
+    health:
+      show-details: when-authorized
+      roles: ADMIN
+  health:
+    db:
+      enabled: true
+    diskspace:
+      enabled: true
+      path: ${user.home}/.pagamenti-ks
+      threshold: 10MB
+
+# Configurazione profili
+---
+# Profilo di sviluppo
+spring:
+  config:
+    activate:
+      on-profile: dev
+  
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  
+  h2:
+    console:
+      enabled: false
+
+  datasource:
+    url: jdbc:sqlite:${user.home}/.pagamenti-ks/dev-database.db
+
+logging:
+  level:
+    root: DEBUG
+    org.springframework: DEBUG
+    org.hibernate: DEBUG
+    com.pagamenti.ks: DEBUG
+
+---
+# Profilo di produzione
+spring:
+  config:
+    activate:
+      on-profile: prod
+  
+  jpa:
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+  
+  datasource:
+    url: jdbc:sqlite:${user.home}/.pagamenti-ks/prod-database.db
+
+logging:
+  level:
+    root: WARN
+    org.springframework: WARN
+    org.hibernate: WARN
+    com.pagamenti.ks: INFO
+
+  file:
+    name: /var/log/pagamenti-ks/application.log
+    max-size: 50MB
+    max-history: 30
+    total-size-cap: 1GB

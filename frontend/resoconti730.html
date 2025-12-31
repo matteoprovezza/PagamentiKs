@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resoconti 730 - KARATE SAN</title>
+    <link rel="stylesheet" href="src/styles.css">
+    <script src="src/api.js"></script>
+    <script src="src/resoconti730.js"></script>
+</head>
+<body>
+    <div id="app">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>KARATE SAN</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="index.html">Dashboard</a>
+                    </li>
+                    <li>
+                        <a href="atleti.html">Gestione Atleti</a>
+                    </li>
+                    <li>
+                        <a href="pagamenti.html">Pagamenti</a>
+                    </li>
+                    <li class="active">
+                        <a href="resoconti730.html">Resoconti 730</a>
+                    </li>
+                </ul>
+            </nav>
+
+        </div>
+
+        <div class="dashboard">
+            <div class="dashboard-header">
+                <h1>Resoconti 730</h1>
+                <div class="header-actions">
+                    <button class="btn btn-primary" onclick="generateAll730Reports()">
+                        📊 Genera Tutti i Resoconti 730
+                    </button>
+                </div>
+            </div>
+            
+            <div class="dashboard-content">
+                <!-- Statistics Section -->
+                <div class="dashboard-stats">
+                    <div class="stat-card">
+                        <h3>TOTALE ATLETI</h3>
+                        <span id="totalAthletes">Caricamento...</span>
+                    </div>
+                    <div class="stat-card">
+                        <h3>RESOCONTI GENERATI</h3>
+                        <span id="generatedReports">Caricamento...</span>
+                    </div>
+                    <div class="stat-card">
+                        <h3>TOTALE INCASSI 2025</h3>
+                        <span id="totalRevenue2025">Caricamento...</span>
+                    </div>
+                </div>
+
+                <!-- Athletes 730 Reports Section -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Resoconti 730 per Atleta</h2>
+                        <div class="header-actions">
+                            <input type="text" id="athlete-search" placeholder="Cerca atleta..." class="search-input">
+                            <select id="status-filter" class="filter-select">
+                                <option value="">Tutti gli stati</option>
+                                <option value="active">Attivi</option>
+                                <option value="inactive">Disattivati</option>
+                            </select>
+                            <select id="year-filter" class="filter-select">
+                                <option value="">Tutti gli anni</option>
+                                <option value="2025">2025</option>
+                                <option value="2024">2024</option>
+                                <option value="2023">2023</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="athletes-730-table-container">
+                            <table class="athletes-table">
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Cognome</th>
+                                        <th>Email</th>
+                                        <th>Telefono</th>
+                                        <th>Data Iscrizione</th>
+                                        <th>Totale Pagamenti</th>
+                                        <th>Stato</th>
+                                        <th>Azioni</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="athletes-730-table-body">
+                                    <tr>
+                                        <td colspan="8" class="loading-row">Caricamento atleti in corso...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,6 @@
+package com.pagamenti.ks.beans;
+
+public enum TipoPagamento{
+    BONIFICO,
+    CONTANTI
+}

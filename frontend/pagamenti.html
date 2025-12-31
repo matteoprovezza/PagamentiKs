@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagamenti - Karate Manager</title>
+    <link rel="stylesheet" href="src/styles.css">
+    <script src="src/api.js"></script>
+    <script src="src/pagamenti.js"></script>
+</head>
+<body>
+    <div id="app">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>KARATE SAN</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="index.html">Dashboard</a>
+                    </li>
+                    <li>
+                        <a href="atleti.html">Gestione Atleti</a>
+                    </li>
+                    <li class="active">
+                        <a href="pagamenti.html">Pagamenti</a>
+                    </li>
+                    <li>
+                        <a href="resoconti730.html">Resoconti 730</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <div class="dashboard">
+            <div class="dashboard-header">
+                <h1>Gestione Pagamenti</h1>
+            </div>
+            
+            <div class="dashboard-content">
+                <!-- Registra Nuovo Pagamento Section -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Registra Nuovo Pagamento</h2>
+                    </div>
+                    <div class="card-content">
+                        <form class="payment-form">
+                            <div class="form-group">
+                                <label for="athlete">Seleziona Atleta</label>
+                                <select id="athlete" name="athlete" required>
+                                    <option value="">Seleziona un atleta...</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="amount">Importo (€)</label>
+                                <input type="number" id="amount" name="amount" step="0.01" min="0" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="date">Data</label>
+                                <input type="date" id="date" name="date" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary" id="registerAndGenerateReceipt">Registra e Genera Ricevuta PDF</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Athletes Quick Payment Section -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Pagamenti Rapidi per Atleta</h2>
+                        <div class="header-actions">
+                            <input type="text" id="athlete-quick-search" placeholder="Cerca atleta..." class="search-input">
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="athletes-quick-payment-container">
+                            <table class="athletes-table">
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Cognome</th>
+                                        <th>Email</th>
+                                        <th>Telefono</th>
+                                        <th>Data Iscrizione</th>
+                                        <th>Stato</th>
+                                        <th>Azioni</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="athletes-quick-payment-table-body">
+                                    <tr>
+                                        <td colspan="7" class="loading-row">Caricamento atleti in corso...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Elenco Pagamenti</h2>
+                        <div class="header-actions">
+                            <select id="athlete-filter" class="filter-select">
+                                <option value="">Tutti gli atleti</option>
+                            </select>
+                            <select id="payment-type-filter" class="filter-select">
+                                <option value="">Tutti i tipi</option>
+                                <option value="CONTANTI">Contanti</option>
+                                <option value="BONIFICO">Bonifico</option>
+                            </select>
+                            <input type="date" id="date-from" class="date-input">
+                            <input type="date" id="date-to" class="date-input">
+                            <button class="btn btn-secondary" onclick="filterPayments()">Filtra</button>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="payments-table-container">
+                            <table class="payments-table">
+                                <thead>
+                                    <tr>
+                                        <th>Data</th>
+                                        <th>Atleta</th>
+                                        <th>Importo</th>
+                                        <th>Tipologia</th>
+                                        <th>Metodo</th>
+                                        <th>Azioni</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="payments-table-body">
+                                    <tr>
+                                        <td colspan="6" class="loading-row">Caricamento in corso...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="src/pagamenti.js"></script>
+</body>
+</html>

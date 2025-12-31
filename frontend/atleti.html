@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestione Atleti - KARATE SAN</title>
+    <link rel="stylesheet" href="src/styles.css">
+    <script src="src/api.js"></script>
+    <script src="src/atleti.js"></script>
+</head>
+<body>
+    <div id="app">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>KARATE SAN</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="active">
+                        <a href="index.html">Dashboard</a>
+                    </li>
+                    <li>
+                        <a href="atleti.html">Gestione Atleti</a>
+                    </li>
+                    <li>
+                        <a href="pagamenti.html">Pagamenti</a>
+                    </li>
+                    <li>
+                        <a href="resoconti730.html">Resoconti 730</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        
+        <div class="dashboard">
+            <div class="dashboard-header">
+                <h1>Gestione Atleti</h1>
+                <button class="btn btn-primary" onclick="showAddAthleteModal()">Aggiungi Nuovo Atleta</button>
+            </div>
+            
+            <div class="dashboard-content">
+                <!-- Athlete Profile Section (Hidden by default) -->
+                <div id="athlete-profile" class="card" style="display: none;">
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <h2 id="profile-title">Profilo Atleta</h2>
+                        <button class="btn btn-secondary" onclick="hideAthleteProfile()">Torna all'elenco</button>
+                    </div>
+                    <div class="card-content" id="athlete-details">
+                        <!-- Will be populated by JavaScript -->
+                        <div class="loading">Caricamento dettagli atleta...</div>
+                    </div>
+                </div>
+
+                <!-- Athlete List Section -->
+                <div id="athlete-list" class="card">
+                    <div class="card-header">
+                        <h2>Elenco Atleti</h2>
+                        <div class="header-actions">
+                            <input type="text" id="athlete-search" placeholder="Cerca atleta..." class="search-input">
+                            <select id="status-filter" class="filter-select">
+                                <option value="">Tutti</option>
+                                <option value="active">Attivi</option>
+                                <option value="inactive">Disattivati</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="athletes-table-container">
+                            <table class="athletes-table">
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Cognome</th>
+                                        <th>Email</th>
+                                        <th>Telefono</th>
+                                        <th>Data Iscrizione</th>
+                                        <th>Stato</th>
+                                        <th>Azioni</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="athletes-table-body">
+                                    <tr>
+                                        <td colspan="7" class="loading-row">Caricamento in corso...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
