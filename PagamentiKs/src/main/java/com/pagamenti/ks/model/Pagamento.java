@@ -30,6 +30,13 @@ public class Pagamento {
     @Schema(description = "Payment date", example = "2024-12-28")
     private LocalDate dataPagamento = LocalDate.now();
     
+    // Legacy/transient field for compatibility
+    @Transient
+    private LocalDate data;
+    
+    @Transient
+    private String metodoPagamento;
+    
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo_pagamento", nullable = false)
     @Schema(description = "Payment type and method", example = "CONTANTI")
@@ -56,19 +63,21 @@ public class Pagamento {
     }
 
     public LocalDate getData() {
-        return data;
+        return data != null ? data : dataPagamento;
     }
 
     public void setData(LocalDate data) {
         this.data = data;
+        this.dataPagamento = data;
     }
 
     public String getMetodoPagamento() {
-        return metodoPagamento;
+        return metodoPagamento != null ? metodoPagamento : (tipoPagamento != null ? tipoPagamento.name() : null);
     }
 
     public void setMetodoPagamento(String metodoPagamento) {
         this.metodoPagamento = metodoPagamento;
+        this.tipoPagamento = TipoPagamento.fromValue(metodoPagamento);
     }
 
     public TipoPagamento getTipoPagamento() {

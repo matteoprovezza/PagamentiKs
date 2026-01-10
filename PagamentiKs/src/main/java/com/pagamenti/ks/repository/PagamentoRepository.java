@@ -16,7 +16,7 @@ public interface PagamentoRepository extends JpaRepository<Pagamento, Long> {
     
     List<Pagamento> findByTipoPagamento(TipoPagamento tipoPagamento);
     
-    @Query("SELECT p FROM Pagamento p WHERE p.data BETWEEN :startDate AND :endDate")
+    @Query("SELECT p FROM Pagamento p WHERE p.dataPagamento BETWEEN :startDate AND :endDate")
     List<Pagamento> findBetweenDates(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
     
     @Query("SELECT SUM(p.importo) FROM Pagamento p WHERE p.atleta.id = :atletaId")
@@ -34,7 +34,5 @@ public interface PagamentoRepository extends JpaRepository<Pagamento, Long> {
         @Param("tipo") TipoPagamento tipo
     );
     
-    List<Pagamento> findByMetodoPagamento(String metodoPagamento);
-    
-    List<Pagamento> findByDataAfter(LocalDate date);
+    List<Pagamento> findByDataPagamentoAfter(LocalDate date);
 }

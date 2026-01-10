@@ -69,17 +69,13 @@ public class PagamentoService {
         return pagamentoRepository.findBetweenDates(startDate, endDate);
     }
 
-    public List<Pagamento> findByMetodoPagamento(String metodoPagamento) {
-        return pagamentoRepository.findByMetodoPagamento(metodoPagamento);
-    }
-
     public Double getTotalPaymentsByAtleta(Long atletaId) {
         return pagamentoRepository.getTotalPagamentiByAtletaId(atletaId);
     }
 
     public List<Pagamento> findRecentPayments(int days) {
         LocalDate cutoffDate = LocalDate.now().minusDays(days);
-        return pagamentoRepository.findByDataAfter(cutoffDate);
+        return pagamentoRepository.findByDataPagamentoAfter(cutoffDate);
     }
     
     public Double getTotalPagamentiByAtletaIdAndTipo(Long atletaId, TipoPagamento tipo) {
