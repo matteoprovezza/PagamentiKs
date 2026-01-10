@@ -102,27 +102,13 @@ class PagamentiPage {
             console.error('Error loading payments data:', error);
             showMessage('Errore nel caricamento dei dati', 'error');
             
-            // Fallback to mock data if API fails
-            console.log('Using fallback mock data...');
-            this.athletes = [
-                { id: 1, nome: 'Mario', cognome: 'Rossi', attivo: true },
-                { id: 2, nome: 'Giulia', cognome: 'Bianchi', attivo: true },
-                { id: 3, nome: 'Paolo', cognome: 'Verdi', attivo: false }
-            ];
-            
-            this.payments = [
-                { id: 1, atleta: { id: 1, nome: 'Mario', cognome: 'Rossi' }, importo: 400, data: '2025-01-15', tipoPagamento: 'CONTANTI', metodoPagamento: 'Contanti' },
-                { id: 2, atleta: { id: 2, nome: 'Giulia', cognome: 'Bianchi' }, importo: 400, data: '2025-01-20', tipoPagamento: 'BONIFICO', metodoPagamento: 'Bonifico Bancario' },
-                { id: 3, atleta: { id: 1, nome: 'Mario', cognome: 'Rossi' }, importo: 300, data: '2025-02-10', tipoPagamento: 'CONTANTI', metodoPagamento: 'Contanti' }
-            ];
-            
+            // Show empty state when backend is unavailable
+            this.athletes = [];
+            this.payments = [];
             this.updatePaymentsTable();
             this.updateAthleteFilter();
             this.updatePaymentFormAthletes();
             this.updateAthletesQuickPaymentGrid();
-            this.bindPaymentFormEvents();
-            this.bindAthletesQuickSearch();
-            showMessage('Dati di esempio caricati (backend non disponibile)', 'info');
         }
     }
 

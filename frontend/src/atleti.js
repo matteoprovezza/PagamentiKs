@@ -47,15 +47,9 @@ class AthletiPage {
             console.error('Error loading athletes:', error);
             showMessage('Errore nel caricamento degli atleti', 'error');
 
-            // Fallback to mock data if API fails
-            console.log('Using fallback mock data...');
-            this.athletes = [
-                { id: 1, nome: 'Mario', cognome: 'Rossi', email: 'mario.rossi@email.com', telefono: '3331234567', dataIscrizione: '2025-01-15', attivo: true },
-                { id: 2, nome: 'Giulia', cognome: 'Bianchi', email: 'giulia.b@email.com', telefono: '3331234568', dataIscrizione: '2025-01-20', attivo: true },
-                { id: 3, nome: 'Paolo', cognome: 'Verdi', email: 'paolo.v@email.com', telefono: '3331234569', dataIscrizione: '2025-02-01', attivo: false }
-            ];
+            // Show empty state when backend is unavailable
+            this.athletes = [];
             this.updateAthletesTable();
-            showMessage('Dati di esempio caricati (backend non disponibile)', 'info');
         }
     }
 
