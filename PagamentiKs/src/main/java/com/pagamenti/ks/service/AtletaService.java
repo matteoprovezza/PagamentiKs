@@ -34,9 +34,21 @@ public class AtletaService {
         return atletaRepository.save(atleta);
     }
 
+    private static final Logger logger = LoggerFactory.getLogger(AtletaService.class);
+
+    @Transactional
     public Atleta update(Long id, Atleta atletaDetails) {
+        logger.info("Inizio aggiornamento atleta con id: {}", id);
+        logger.info("Dati ricevuti in ingresso: {}", atletaDetails);
+        
         return atletaRepository.findById(id)
                 .map(atleta -> {
+                    logger.info("Atleta trovato nel DB prima dell'aggiornamento: {}", atleta);
+                    
+                    // Log dei valori prima dell'aggiornamento
+                    logger.info("Valore scadenzaTesseramentoAsc in ingresso: {}", atletaDetails.getScadenzaTesseramentoAsc());
+                    
+                    // Aggiornamento campi
                     atleta.setNome(atletaDetails.getNome());
                     atleta.setCognome(atletaDetails.getCognome());
                     atleta.setCf(atletaDetails.getCf());
@@ -45,12 +57,25 @@ public class AtletaService {
                     atleta.setTelefono(atletaDetails.getTelefono());
                     atleta.setEmail(atletaDetails.getEmail());
                     atleta.setDataScadenzaCertificato(atletaDetails.getDataScadenzaCertificato());
-                    atleta.setScadenzaTesseramentoAsc(atletaDetails.getScadenzaTesseramentoAsc());
+                    
+                    // Aggiornamento esplicito con log
+                    LocalDate nuovaScadenza = atletaDetails.getScadenzaTesseramentoAsc();
+                    logger.info("Imposto scadenzaTesseramentoAsc a: {}", nuovaScadenza);
+                    atleta.setScadenzaTesseramentoAsc(nuovaScadenza);
+                    
+                    atleta.setDataIscrizione(atletaDetails.getDataIscrizione());
                     atleta.setAttivo(atletaDetails.isAttivo());
                     atleta.setNote(atletaDetails.getNote());
-                    return atletaRepository.save(atleta);
+                    
+                    Atleta atletaAggiornato = atletaRepository.save(atleta);
+                    logger.info("Atleta dopo il salvataggio: {}", atletaAggiornato);
+                    
+                    return atletaAggiornato;
                 })
-                .orElseThrow(() -> new RuntimeException("Atleta non trovato con id: " + id));
+                .orElseThrow(() -> {
+                    logger.error("Atleta non trovato con id: {}", id);
+                    return new RuntimeException("Atleta non trovato con id: " + id);
+                });
     }
 
     public void deleteById(Long id) {
@@ -97,6 +122,15 @@ public class AtletaService {
     }
 
     public List<Atleta> findAthletesWithExpiringMembership(int daysBefore) {
+        LocalDate dateLimit = LocalDate.now().plusDays(daysBefore);
+        return atletaRepository.findAll().stream()
+                .filter(atleta -> atleta.isAttivo() && 
+                        atleta.getScadenzaTesseramentoAsc() != null &&
+                        atleta.getScadenzaTesseramentoAsc().isBefore(dateLimit))
+                .toList();
+    }
+
+    public List<Atleta> findAthletesWithExpiringAscMembership(int daysBefore) {
         LocalDate dateLimit = LocalDate.now().plusDays(daysBefore);
         return atletaRepository.findAll().stream()
                 .filter(atleta -> atleta.isAttivo() && 

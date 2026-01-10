@@ -222,6 +222,14 @@ class AthletiPage {
                     </div>
                 </div>
                 
+                <div class="profile-section">
+                    <h3>Tesseramento ASC</h3>
+                    <div class="profile-field">
+                        <label>Scadenza Tesseramento:</label>
+                        <span>${athlete.scadenzaTesseramentoAsc ? formatDate(athlete.scadenzaTesseramentoAsc) : 'Non specificata'}</span>
+                    </div>
+                </div>
+                
                 ${athlete.note ? `
                 <div class="profile-section full-width">
                     <h3>Note</h3>

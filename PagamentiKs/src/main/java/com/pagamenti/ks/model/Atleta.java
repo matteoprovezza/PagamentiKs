@@ -1,6 +1,8 @@
 package com.pagamenti.ks.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import java.time.LocalDate;
@@ -9,6 +11,7 @@ import java.util.List;
 @Entity
 @Table(name = "atleti")
 @Schema(description = "Athlete entity representing a sports athlete")
+@JsonInclude(JsonInclude.Include.ALWAYS)
 public class Atleta {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,14 +40,17 @@ public class Atleta {
     @Column(nullable = true)
     private String email;
     
-    @Column(nullable = true)
+    @Column(name = "data_iscrizione", nullable = true)
+    @Schema(description = "Data di iscrizione dell'atleta")
     private LocalDate dataIscrizione;
     
-    @Column(nullable = true)
+    @Column(name = "data_scadenza_certificato", nullable = true)
+    @Schema(description = "Data di scadenza del certificato medico")
     private LocalDate dataScadenzaCertificato;
     
     @Column(name = "scadenza_tesseramento_asc", nullable = true)
     @Schema(description = "Scadenza tesseramento ASC", example = "2024-12-31")
+    @JsonProperty("scadenzaTesseramentoAsc")
     private LocalDate scadenzaTesseramentoAsc;
     
     @Column(nullable = true)

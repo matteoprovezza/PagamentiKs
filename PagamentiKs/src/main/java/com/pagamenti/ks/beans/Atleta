@@ -1,12 +1,13 @@
 package com.pagamenti.ks.beans;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.List;
 
 @Entity
 public class Atleta {
     @Column(nullable = true)
-    private java.time.LocalDate disableDate;
+    private LocalDate disableDate;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -14,12 +15,42 @@ public class Atleta {
     private String nome;
     private String cognome;
     private String cf;
+    
+    @Column(nullable = true)
+    private LocalDate dataNascita;
+    
+    @Column(nullable = true)
+    private String indirizzo;
+    
+    @Column(nullable = true)
+    private String telefono;
+    
+    @Column(nullable = true)
+    private String email;
+    
+    @Column(nullable = true)
+    private LocalDate dataIscrizione;
+    
+    @Column(nullable = true)
+    private LocalDate dataScadenzaCertificato;
+    
+    @Column(name = "scadenza_tesseramento_asc", nullable = true)
+    private LocalDate scadenzaTesseramentoAsc;
+    
+    @Column(nullable = true)
+    private String note;
+    
+    @Column(nullable = false)
+    private Boolean attivo = true;
+    
+    @OneToMany(mappedBy = "atleta", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Paga> pagamenti;
 
-    public java.time.LocalDate getDisableDate() {
+    public LocalDate getDisableDate() {
         return disableDate;
     }
 
-    public void setDisableDate(java.time.LocalDate disableDate) {
+    public void setDisableDate(LocalDate disableDate) {
         this.disableDate = disableDate;
     }
 
@@ -53,5 +84,85 @@ public class Atleta {
 
     public void setCf(String cf) {
         this.cf = cf;
+    }
+
+    public LocalDate getDataNascita() {
+        return dataNascita;
+    }
+
+    public void setDataNascita(LocalDate dataNascita) {
+        this.dataNascita = dataNascita;
+    }
+
+    public String getIndirizzo() {
+        return indirizzo;
+    }
+
+    public void setIndirizzo(String indirizzo) {
+        this.indirizzo = indirizzo;
+    }
+
+    public String getTelefono() {
+        return telefono;
+    }
+
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public LocalDate getDataIscrizione() {
+        return dataIscrizione;
+    }
+
+    public void setDataIscrizione(LocalDate dataIscrizione) {
+        this.dataIscrizione = dataIscrizione;
+    }
+
+    public LocalDate getDataScadenzaCertificato() {
+        return dataScadenzaCertificato;
+    }
+
+    public void setDataScadenzaCertificato(LocalDate dataScadenzaCertificato) {
+        this.dataScadenzaCertificato = dataScadenzaCertificato;
+    }
+
+    public LocalDate getScadenzaTesseramentoAsc() {
+        return scadenzaTesseramentoAsc;
+    }
+
+    public void setScadenzaTesseramentoAsc(LocalDate scadenzaTesseramentoAsc) {
+        this.scadenzaTesseramentoAsc = scadenzaTesseramentoAsc;
+    }
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
+    }
+
+    public Boolean isAttivo() {
+        return attivo;
+    }
+
+    public void setAttivo(Boolean attivo) {
+        this.attivo = attivo;
+    }
+
+    public List<Paga> getPagamenti() {
+        return pagamenti;
+    }
+
+    public void setPagamenti(List<Paga> pagamenti) {
+        this.pagamenti = pagamenti;
     }
 }

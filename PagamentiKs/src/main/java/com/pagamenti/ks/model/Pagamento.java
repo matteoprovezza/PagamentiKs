@@ -22,21 +22,18 @@ public class Pagamento {
     @Schema(description = "Athlete who made the payment")
     private Atleta atleta;
     
+    @Column(nullable = false)
     @Schema(description = "Payment amount", example = "50.00")
     private Double importo;
     
-    @Column(columnDefinition = "DATE DEFAULT CURRENT_DATE")
+    @Column(name = "data_pagamento", columnDefinition = "DATE DEFAULT CURRENT_DATE", nullable = false)
     @Schema(description = "Payment date", example = "2024-12-28")
-    private LocalDate data = LocalDate.now();
+    private LocalDate dataPagamento = LocalDate.now();
     
     @Enumerated(EnumType.STRING)
-    @Column(name = "tipo_pagamento")
-    @Schema(description = "Payment type", example = "CONTANTI")
+    @Column(name = "tipo_pagamento", nullable = false)
+    @Schema(description = "Payment type and method", example = "CONTANTI")
     private TipoPagamento tipoPagamento;
-    
-    @Column(name = "metodo_pagamento")
-    @Schema(description = "Payment method", example = "Contanti")
-    private String metodoPagamento;
 
     // Constructors
     public Pagamento() {}
