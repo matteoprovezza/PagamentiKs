@@ -15,6 +15,20 @@ services:
     networks:
       - app-network
 
+  db_prod:
+    image: postgres:13
+    container_name: gestionale_ks_prod
+    environment:
+      POSTGRES_DB: pagamenti_db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./postgres_data_prod:/var/lib/postgresql/data
+    networks:
+      - app-network
+
   app:
     build:
       context: ./PagamentiKs
