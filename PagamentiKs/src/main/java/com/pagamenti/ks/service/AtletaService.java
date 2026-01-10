@@ -2,6 +2,8 @@ package com.pagamenti.ks.service;
 
 import com.pagamenti.ks.model.Atleta;
 import com.pagamenti.ks.repository.AtletaRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,14 +42,14 @@ public class AtletaService {
     public Atleta update(Long id, Atleta atletaDetails) {
         logger.info("Inizio aggiornamento atleta con id: {}", id);
         logger.info("Dati ricevuti in ingresso: {}", atletaDetails);
-        
+
         return atletaRepository.findById(id)
                 .map(atleta -> {
                     logger.info("Atleta trovato nel DB prima dell'aggiornamento: {}", atleta);
-                    
+
                     // Log dei valori prima dell'aggiornamento
                     logger.info("Valore scadenzaTesseramentoAsc in ingresso: {}", atletaDetails.getScadenzaTesseramentoAsc());
-                    
+
                     // Aggiornamento campi
                     atleta.setNome(atletaDetails.getNome());
                     atleta.setCognome(atletaDetails.getCognome());
@@ -57,19 +59,21 @@ public class AtletaService {
                     atleta.setTelefono(atletaDetails.getTelefono());
                     atleta.setEmail(atletaDetails.getEmail());
                     atleta.setDataScadenzaCertificato(atletaDetails.getDataScadenzaCertificato());
-                    
+
                     // Aggiornamento esplicito con log
                     LocalDate nuovaScadenza = atletaDetails.getScadenzaTesseramentoAsc();
                     logger.info("Imposto scadenzaTesseramentoAsc a: {}", nuovaScadenza);
                     atleta.setScadenzaTesseramentoAsc(nuovaScadenza);
-                    
+
                     atleta.setDataIscrizione(atletaDetails.getDataIscrizione());
-                    atleta.setAttivo(atletaDetails.isAttivo());
+                    if (atletaDetails.isAttivo() != null) {
+                        atleta.setAttivo(atletaDetails.isAttivo());
+                    }
                     atleta.setNote(atletaDetails.getNote());
-                    
+
                     Atleta atletaAggiornato = atletaRepository.save(atleta);
                     logger.info("Atleta dopo il salvataggio: {}", atletaAggiornato);
-                    
+
                     return atletaAggiornato;
                 })
                 .orElseThrow(() -> {
@@ -108,34 +112,40 @@ public class AtletaService {
 
     public List<Atleta> findActiveAthletes() {
         return atletaRepository.findAll().stream()
-                .filter(Atleta::isAttivo)
+                .filter(atleta -> Boolean.TRUE.equals(atleta.isAttivo()))
                 .toList();
     }
 
     public List<Atleta> findAthletesWithExpiringCertificate(int daysBefore) {
+        LocalDate today = LocalDate.now();
         LocalDate dateLimit = LocalDate.now().plusDays(daysBefore);
         return atletaRepository.findAll().stream()
-                .filter(atleta -> atleta.isAttivo() && 
+                .filter(atleta -> Boolean.TRUE.equals(atleta.isAttivo()) &&
                         atleta.getDataScadenzaCertificato() != null &&
-                        atleta.getDataScadenzaCertificato().isBefore(dateLimit))
+                        !atleta.getDataScadenzaCertificato().isBefore(today) &&
+                        !atleta.getDataScadenzaCertificato().isAfter(dateLimit))
                 .toList();
     }
 
     public List<Atleta> findAthletesWithExpiringMembership(int daysBefore) {
+        LocalDate today = LocalDate.now();
         LocalDate dateLimit = LocalDate.now().plusDays(daysBefore);
         return atletaRepository.findAll().stream()
-                .filter(atleta -> atleta.isAttivo() && 
+                .filter(atleta -> Boolean.TRUE.equals(atleta.isAttivo()) &&
                         atleta.getScadenzaTesseramentoAsc() != null &&
-                        atleta.getScadenzaTesseramentoAsc().isBefore(dateLimit))
+                        !atleta.getScadenzaTesseramentoAsc().isBefore(today) &&
+                        !atleta.getScadenzaTesseramentoAsc().isAfter(dateLimit))
                 .toList();
     }
 
     public List<Atleta> findAthletesWithExpiringAscMembership(int daysBefore) {
+        LocalDate today = LocalDate.now();
         LocalDate dateLimit = LocalDate.now().plusDays(daysBefore);
         return atletaRepository.findAll().stream()
-                .filter(atleta -> atleta.isAttivo() && 
+                .filter(atleta -> Boolean.TRUE.equals(atleta.isAttivo()) &&
                         atleta.getScadenzaTesseramentoAsc() != null &&
-                        atleta.getScadenzaTesseramentoAsc().isBefore(dateLimit))
+                        !atleta.getScadenzaTesseramentoAsc().isBefore(today) &&
+                        !atleta.getScadenzaTesseramentoAsc().isAfter(dateLimit))
                 .toList();
     }
 }

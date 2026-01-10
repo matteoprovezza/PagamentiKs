@@ -135,7 +135,10 @@ class AthletiPage {
         let certificateStatus = '';
         let certificateClass = '';
         if (athlete.dataScadenzaCertificato) {
-            const expiryDate = new Date(athlete.dataScadenzaCertificato);
+            const parts = String(athlete.dataScadenzaCertificato).split('-');
+            const expiryDate = parts.length === 3
+                ? new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]))
+                : new Date(athlete.dataScadenzaCertificato);
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             const timeDiff = expiryDate.getTime() - today.getTime();
@@ -559,8 +562,7 @@ async function handleEditAthlete(e, modal) {
         indirizzo: formData.get('indirizzo') || null,
         note: formData.get('note') || null,
         dataScadenzaCertificato: formData.get('dataScadenzaCertificato') || null,
-        scadenzaTesseramentoAsc: formData.get('scadenzaTesseramentoAsc') || null,
-        attivo: true
+        scadenzaTesseramentoAsc: formData.get('scadenzaTesseramentoAsc') || null
     };
 
     // Validate required fields

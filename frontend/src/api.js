@@ -265,8 +265,17 @@ function formatCurrency(amount) {
 }
 
 function formatDate(dateString) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('it-IT');
+    if (!dateString) return '';
+    const parts = String(dateString).split('-');
+    if (parts.length !== 3) {
+        const fallback = new Date(dateString);
+        return isNaN(fallback.getTime()) ? '' : fallback.toLocaleDateString('it-IT');
+    }
+    const year = Number(parts[0]);
+    const month = Number(parts[1]);
+    const day = Number(parts[2]);
+    const date = new Date(year, month - 1, day);
+    return isNaN(date.getTime()) ? '' : date.toLocaleDateString('it-IT');
 }
 
 function showMessage(message, type = 'info') {
