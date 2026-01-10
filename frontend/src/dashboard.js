@@ -34,19 +34,43 @@ class DashboardPage {
             this.expiringCertificates = await api.getExpiringCertificates(30);
             console.log('Expiring certificates loaded:', this.expiringCertificates.length, this.expiringCertificates);
             
+            // Load expiring memberships
+            console.log('Fetching expiring memberships...');
+            this.expiringMemberships = await api.getExpiringMemberships(30);
+            console.log('Expiring memberships loaded:', this.expiringMemberships.length, this.expiringMemberships);
+            
             this.updateStats(stats);
             this.renderExpiringCertificates();
+            this.renderExpiringMemberships();
             console.log('Dashboard updated successfully');
             
         } catch (error) {
             console.error('Error loading dashboard data:', error);
             showMessage('Errore nel caricamento dei dati', 'error');
             
-            // Show fallback values for testing
-            console.log('Using fallback values...');
-            document.getElementById('totalAthletes').textContent = '50';
-            document.getElementById('revenue2025').textContent = '€ 12.450';
-            document.getElementById('receiptsToGenerate').textContent = '12';
+            // Show empty values when database is empty or API is unavailable
+            console.log('Database empty or API unavailable - showing empty values...');
+            document.getElementById('totalAthletes').textContent = '0';
+            document.getElementById('revenue2025').textContent = '€ 0';
+            document.getElementById('receiptsToGenerate').textContent = '0';
+            
+            // Show empty state for expiring items
+            const certContainer = document.getElementById('expiringCertificates');
+            const membContainer = document.getElementById('expiringMemberships');
+            if (certContainer) {
+                certContainer.innerHTML = `
+                    <div class="no-certificates">
+                        <i class="fas fa-calendar-check"></i>
+                        <div>Nessun certificato in scadenza nei prossimi 30 giorni</div>
+                    </div>`;
+            }
+            if (membContainer) {
+                membContainer.innerHTML = `
+                    <div class="no-certificates">
+                        <i class="fas fa-id-card"></i>
+                        <div>Nessun tesseramento in scadenza nei prossimi 30 giorni</div>
+                    </div>`;
+            }
         }
     }
 
@@ -214,6 +238,102 @@ class DashboardPage {
         });
         
         console.log('All certificates rendered successfully');
+    }
+
+    renderExpiringMemberships() {
+        console.log('renderExpiringMemberships called');
+        
+        const container = document.getElementById('expiringMemberships');
+        
+        if (!container) {
+            console.log('Container #expiringMemberships not found - skipping expiring memberships render');
+            return;
+        }
+        
+        console.log('Container found:', container);
+
+        if (!this.expiringMemberships || this.expiringMemberships.length === 0) {
+            console.log('No expiring memberships to display');
+            container.innerHTML = `
+                <div class="no-certificates">
+                    <i class="fas fa-id-card"></i>
+                    <div>Nessun tesseramento in scadenza nei prossimi 30 giorni</div>
+                </div>`;
+            return;
+        }
+
+        console.log('Rendering memberships:', this.expiringMemberships);
+        
+        // Sort by days to expiry (ascending)
+        const sortedMemberships = [...this.expiringMemberships].sort((a, b) => 
+            a.giorniAllaScadenza - b.giorniAllaScadenza
+        );
+
+        container.innerHTML = '';
+
+        sortedMemberships.forEach((memb, index) => {
+            console.log(`Processing membership ${index}:`, memb);
+            
+            // Ensure we have a valid date
+            const expiryDate = memb.scadenzaTesseramentoAsc ? new Date(memb.scadenzaTesseramentoAsc) : null;
+            const formattedDate = expiryDate && !isNaN(expiryDate) 
+                ? expiryDate.toLocaleDateString('it-IT', {
+                    weekday: 'long',
+                    day: '2-digit',
+                    month: 'long',
+                    year: 'numeric'
+                })
+                : 'Data non disponibile';
+
+            // Calculate days to expiry if not provided
+            let daysToExpiry = memb.giorniAllaScadenza;
+            if ((daysToExpiry === undefined || daysToExpiry === null) && expiryDate) {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const timeDiff = expiryDate.getTime() - today.getTime();
+                daysToExpiry = Math.ceil(timeDiff / (1000 * 3600 * 24));
+            }
+            const expiryClass = daysToExpiry <= 7 ? 'danger' : 'warning';
+            const expiryText = daysToExpiry === 0 ? 
+                'Scade oggi' : 
+                daysToExpiry === 1 ? 
+                    'Scade domani' : 
+                    `Scade tra ${daysToExpiry} giorni`;
+
+            const membElement = document.createElement('li');
+            membElement.className = 'certificate-item';
+            membElement.innerHTML = `
+                <div class="certificate-name" title="Vai ai dettagli di ${memb.nome} ${memb.cognome}">
+                    <i class="fas fa-id-card"></i>
+                    ${memb.nome} ${memb.cognome}
+                    <span class="certificate-expiry ${expiryClass}" title="${formattedDate}">
+                        <i class="fas ${expiryClass === 'danger' ? 'fa-exclamation-circle' : 'fa-calendar-alt'}"></i>
+                        ${expiryText}
+                    </span>
+                </div>
+            `;
+            
+            // Make the whole card clickable
+            membElement.style.cursor = 'pointer';
+            membElement.addEventListener('click', (e) => {
+                console.log('Membership clicked!', memb);
+                console.log('Navigating to:', `atleti.html?id=${memb.id}`);
+                
+                // Don't navigate if a button was clicked
+                if (!e.target.closest('button')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // Navigate to athlete details page
+                    window.location.href = `atleti.html?id=${memb.id}`;
+                }
+            });
+            
+            container.appendChild(membElement);
+            console.log(`Membership ${index} added to container`);
+        });
+        
+        console.log('All memberships rendered successfully');
     }
 
     showAthleteDetails(athlete) {

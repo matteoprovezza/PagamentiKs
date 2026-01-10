@@ -47,15 +47,9 @@ class AthletiPage {
             console.error('Error loading athletes:', error);
             showMessage('Errore nel caricamento degli atleti', 'error');
 
-            // Fallback to mock data if API fails
-            console.log('Using fallback mock data...');
-            this.athletes = [
-                { id: 1, nome: 'Mario', cognome: 'Rossi', email: 'mario.rossi@email.com', telefono: '3331234567', dataIscrizione: '2025-01-15', attivo: true },
-                { id: 2, nome: 'Giulia', cognome: 'Bianchi', email: 'giulia.b@email.com', telefono: '3331234568', dataIscrizione: '2025-01-20', attivo: true },
-                { id: 3, nome: 'Paolo', cognome: 'Verdi', email: 'paolo.v@email.com', telefono: '3331234569', dataIscrizione: '2025-02-01', attivo: false }
-            ];
+            // Show empty state when backend is unavailable
+            this.athletes = [];
             this.updateAthletesTable();
-            showMessage('Dati di esempio caricati (backend non disponibile)', 'info');
         }
     }
 
@@ -344,6 +338,10 @@ window.showAddAthleteModal = async function () {
                         <label for="dataScadenzaCertificato">Data Scadenza Certificato Medico</label>
                         <input type="date" id="dataScadenzaCertificato" name="dataScadenzaCertificato">
                     </div>
+                    <div class="form-group">
+                        <label for="scadenzaTesseramentoAsc">Scadenza Tesseramento ASC</label>
+                        <input type="date" id="scadenzaTesseramentoAsc" name="scadenzaTesseramentoAsc">
+                    </div>
                     <div class="form-actions">
                         <button type="submit" class="btn btn-primary">Salva</button>
                         <button type="button" class="btn btn-secondary modal-cancel">Annulla</button>
@@ -424,6 +422,11 @@ window.editAthlete = async function (id) {
                             <label for="dataScadenzaCertificato">Data Scadenza Certificato Medico</label>
                             <input type="date" id="dataScadenzaCertificato" name="dataScadenzaCertificato" 
                                    value="${athlete.dataScadenzaCertificato || ''}">
+                        </div>
+                        <div class="form-group">
+                            <label for="scadenzaTesseramentoAsc">Scadenza Tesseramento ASC</label>
+                            <input type="date" id="scadenzaTesseramentoAsc" name="scadenzaTesseramentoAsc" 
+                                   value="${athlete.scadenzaTesseramentoAsc || ''}">
                         </div>
                         <div class="form-group">
                             <label for="note">Note</label>
@@ -507,6 +510,7 @@ async function handleAddAthlete(e, modal) {
         indirizzo: formData.get('indirizzo'),
         note: formData.get('note'),
         dataScadenzaCertificato: formData.get('dataScadenzaCertificato') || null,
+        scadenzaTesseramentoAsc: formData.get('scadenzaTesseramentoAsc') || null,
         attivo: true
     };
 
@@ -547,6 +551,7 @@ async function handleEditAthlete(e, modal) {
         indirizzo: formData.get('indirizzo') || null,
         note: formData.get('note') || null,
         dataScadenzaCertificato: formData.get('dataScadenzaCertificato') || null,
+        scadenzaTesseramentoAsc: formData.get('scadenzaTesseramentoAsc') || null,
         attivo: true
     };
 

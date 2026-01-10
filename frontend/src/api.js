@@ -64,6 +64,11 @@ class ApiClient {
         return this.request(`/atleti/expiring-certificates?days=${days}`);
     }
 
+    // Get athletes with expiring memberships
+    async getExpiringMemberships(days = 30) {
+        return this.request(`/atleti/expiring-memberships?days=${days}`);
+    }
+
     async getAthleteById(id) {
         return this.request(`/atleti/${id}`);
     }

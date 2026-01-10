@@ -45,6 +45,7 @@ public class AtletaService {
                     atleta.setTelefono(atletaDetails.getTelefono());
                     atleta.setEmail(atletaDetails.getEmail());
                     atleta.setDataScadenzaCertificato(atletaDetails.getDataScadenzaCertificato());
+                    atleta.setScadenzaTesseramentoAsc(atletaDetails.getScadenzaTesseramentoAsc());
                     atleta.setAttivo(atletaDetails.isAttivo());
                     atleta.setNote(atletaDetails.getNote());
                     return atletaRepository.save(atleta);
@@ -92,6 +93,15 @@ public class AtletaService {
                 .filter(atleta -> atleta.isAttivo() && 
                         atleta.getDataScadenzaCertificato() != null &&
                         atleta.getDataScadenzaCertificato().isBefore(dateLimit))
+                .toList();
+    }
+
+    public List<Atleta> findAthletesWithExpiringMembership(int daysBefore) {
+        LocalDate dateLimit = LocalDate.now().plusDays(daysBefore);
+        return atletaRepository.findAll().stream()
+                .filter(atleta -> atleta.isAttivo() && 
+                        atleta.getScadenzaTesseramentoAsc() != null &&
+                        atleta.getScadenzaTesseramentoAsc().isBefore(dateLimit))
                 .toList();
     }
 }

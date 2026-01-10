@@ -22,6 +22,7 @@ public class Atleta {
     private String cognome;
     
     @Schema(description = "Codice Fiscale of the athlete")
+    @Column(nullable = true)
     private String cf;
     
     @Column(nullable = true)
@@ -41,6 +42,10 @@ public class Atleta {
     
     @Column(nullable = true)
     private LocalDate dataScadenzaCertificato;
+    
+    @Column(name = "scadenza_tesseramento_asc", nullable = true)
+    @Schema(description = "Scadenza tesseramento ASC", example = "2024-12-31")
+    private LocalDate scadenzaTesseramentoAsc;
     
     @Column(nullable = true)
     private String note;
@@ -137,6 +142,14 @@ public class Atleta {
 
     public void setDataScadenzaCertificato(LocalDate dataScadenzaCertificato) {
         this.dataScadenzaCertificato = dataScadenzaCertificato;
+    }
+
+    public LocalDate getScadenzaTesseramentoAsc() {
+        return scadenzaTesseramentoAsc;
+    }
+
+    public void setScadenzaTesseramentoAsc(LocalDate scadenzaTesseramentoAsc) {
+        this.scadenzaTesseramentoAsc = scadenzaTesseramentoAsc;
     }
 
     public String getNote() {

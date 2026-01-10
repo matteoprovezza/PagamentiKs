@@ -37,23 +37,11 @@ class Resoconti730Page {
             console.error('Error loading dashboard data:', error);
             showMessage('Errore nel caricamento dei dati', 'error');
             
-            // Fallback to mock data for testing
-            console.log('Using fallback values...');
-            this.athletes = [
-                { id: 1, nome: 'Mario', cognome: 'Rossi', email: 'mario@email.com', telefono: '3331234567', dataIscrizione: '2023-01-15', attivo: true },
-                { id: 2, nome: 'Giulia', cognome: 'Bianchi', email: 'giulia@email.com', telefono: '3331234568', dataIscrizione: '2023-02-20', attivo: true },
-                { id: 3, nome: 'Paolo', cognome: 'Verdi', email: 'paolo@email.com', telefono: '3331234569', dataIscrizione: '2023-03-10', attivo: false }
-            ];
-            
-            this.payments = [
-                { id: 1, atletaId: 1, importo: 400, data: '2023-01-15', tipoPagamento: 'CONTANTI' },
-                { id: 2, atletaId: 2, importo: 400, data: '2023-02-20', tipoPagamento: 'BONIFICO' },
-                { id: 3, atletaId: 1, importo: 300, data: '2023-04-10', tipoPagamento: 'CONTANTI' }
-            ];
-            
+            // Show empty state when backend is unavailable
+            this.athletes = [];
+            this.payments = [];
             this.updateStats({});
             this.updateAthletes730Table();
-            showMessage('Dati di esempio caricati (backend non disponibile)', 'info');
         }
     }
 

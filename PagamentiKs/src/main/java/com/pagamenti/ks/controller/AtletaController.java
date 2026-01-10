@@ -61,6 +61,13 @@ public class AtletaController {
         return ResponseEntity.ok(atletaService.findAthletesWithExpiringCertificate(days));
     }
 
+    @GetMapping("/expiring-memberships")
+    @Operation(summary = "Get athletes with memberships expiring in next X days")
+    public ResponseEntity<List<Atleta>> getAthletesWithExpiringMemberships(
+            @RequestParam(defaultValue = "30") int days) {
+        return ResponseEntity.ok(atletaService.findAthletesWithExpiringMembership(days));
+    }
+
     @PostMapping({"", "/create"})
     @Operation(summary = "Create a new athlete")
     public ResponseEntity<Atleta> create(@RequestBody Atleta atleta) {
