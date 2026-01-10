@@ -338,6 +338,10 @@ window.showAddAthleteModal = async function () {
                         <label for="dataScadenzaCertificato">Data Scadenza Certificato Medico</label>
                         <input type="date" id="dataScadenzaCertificato" name="dataScadenzaCertificato">
                     </div>
+                    <div class="form-group">
+                        <label for="scadenzaTesseramentoAsc">Scadenza Tesseramento ASC</label>
+                        <input type="date" id="scadenzaTesseramentoAsc" name="scadenzaTesseramentoAsc">
+                    </div>
                     <div class="form-actions">
                         <button type="submit" class="btn btn-primary">Salva</button>
                         <button type="button" class="btn btn-secondary modal-cancel">Annulla</button>
@@ -418,6 +422,11 @@ window.editAthlete = async function (id) {
                             <label for="dataScadenzaCertificato">Data Scadenza Certificato Medico</label>
                             <input type="date" id="dataScadenzaCertificato" name="dataScadenzaCertificato" 
                                    value="${athlete.dataScadenzaCertificato || ''}">
+                        </div>
+                        <div class="form-group">
+                            <label for="scadenzaTesseramentoAsc">Scadenza Tesseramento ASC</label>
+                            <input type="date" id="scadenzaTesseramentoAsc" name="scadenzaTesseramentoAsc" 
+                                   value="${athlete.scadenzaTesseramentoAsc || ''}">
                         </div>
                         <div class="form-group">
                             <label for="note">Note</label>
@@ -501,6 +510,7 @@ async function handleAddAthlete(e, modal) {
         indirizzo: formData.get('indirizzo'),
         note: formData.get('note'),
         dataScadenzaCertificato: formData.get('dataScadenzaCertificato') || null,
+        scadenzaTesseramentoAsc: formData.get('scadenzaTesseramentoAsc') || null,
         attivo: true
     };
 
@@ -541,6 +551,7 @@ async function handleEditAthlete(e, modal) {
         indirizzo: formData.get('indirizzo') || null,
         note: formData.get('note') || null,
         dataScadenzaCertificato: formData.get('dataScadenzaCertificato') || null,
+        scadenzaTesseramentoAsc: formData.get('scadenzaTesseramentoAsc') || null,
         attivo: true
     };
 
