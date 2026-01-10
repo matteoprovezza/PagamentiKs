@@ -3,7 +3,7 @@ version: '3.8'
 services:
   db:
     image: postgres:13
-    container_name: gestionale_KS_DEV_db
+    container_name: gestionale_KS_PROD_db
     environment:
       POSTGRES_DB: pagamenti_db
       POSTGRES_USER: user
@@ -11,46 +11,50 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data_prod:/var/lib/postgresql/data
     networks:
-      - gestionale_DEV_network
+      - gestionale_PROD_network
+    restart: unless-stopped
 
   app:
-    image: gestionale_ks_dev_app
+    image: gestionale_ks_prod_app
     build:
-      context: ./PagamentiKs
+      context: ../PagamentiKs
       dockerfile: Dockerfile
-    container_name: gestionale_KS_DEV_app
+    container_name: gestionale_KS_PROD_app
     depends_on:
       - db
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/pagamenti_db
       - SPRING_DATASOURCE_USERNAME=user
       - SPRING_DATASOURCE_PASSWORD=password
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=validate
+      - SPRING_PROFILES_ACTIVE=prod
     ports:
       - "8080:8080"
     networks:
-      - gestionale_DEV_network
+      - gestionale_PROD_network
+    restart: unless-stopped
 
   frontend:
-    image: gestionale_ks_dev_frontend
+    image: gestionale_ks_prod_frontend
     build:
-      context: ./frontend
+      context: ../frontend
       dockerfile: Dockerfile
-    container_name: gestionale_KS_DEV_frontend
+    container_name: gestionale_KS_PROD_frontend
     depends_on:
       - app
     ports:
       - "3000:3000"
     networks:
-      - gestionale_DEV_network
+      - gestionale_PROD_network
     environment:
-      - API_BASE_URL=http://gestionale_KS_DEV_app:8080/api/v1
+      - API_BASE_URL=http://gestionale_KS_PROD_app:8080/api/v1
+    restart: unless-stopped
 
 networks:
-  gestionale_DEV_network:
+  gestionale_PROD_network:
     driver: bridge
 
 volumes:
-  postgres_data:
+  postgres_data_prod:
