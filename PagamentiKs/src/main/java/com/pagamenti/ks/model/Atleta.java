@@ -22,6 +22,7 @@ public class Atleta {
     private String cognome;
     
     @Schema(description = "Codice Fiscale of the athlete")
+    @Column(nullable = true)
     private String cf;
     
     @Column(nullable = true)
