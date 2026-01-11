@@ -295,7 +295,7 @@ window.hideAthleteProfile = function () {
 window.showAddAthleteModal = async function () {
     const modal = document.createElement('div');
     modal.className = 'modal';
-    modal.innerHTML = `
+    const modalHTML = `
         <div class="modal-content">
             <div class="modal-header">
                 <h3>Aggiungi Nuovo Atleta</h3>
@@ -326,6 +326,10 @@ window.showAddAthleteModal = async function () {
                             <label for="dataIscrizione">Data Iscrizione</label>
                             <input type="date" id="dataIscrizione" name="dataIscrizione">
                         </div>
+                        <div class="form-group">
+                            <label for="scadenzaTesseramentoAsc">Scadenza Tesseramento ASC</label>
+                            <input type="date" id="scadenzaTesseramentoAsc" name="scadenzaTesseramentoAsc">
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="indirizzo">Indirizzo</label>
@@ -342,16 +346,16 @@ window.showAddAthleteModal = async function () {
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="note">Note</label>
-                        <textarea id="note" name="note" rows="3"></textarea>
-                    </div>
-                    <div class="form-group">
                         <label for="dataScadenzaCertificato">Data Scadenza Certificato Medico</label>
                         <input type="date" id="dataScadenzaCertificato" name="dataScadenzaCertificato">
                     </div>
                     <div class="form-group">
                         <label for="scadenzaTesseramentoAsc">Scadenza Tesseramento ASC</label>
                         <input type="date" id="scadenzaTesseramentoAsc" name="scadenzaTesseramentoAsc">
+                    </div>
+                    <div class="form-group">
+                        <label for="note">Note</label>
+                        <textarea id="note" name="note" rows="3"></textarea>
                     </div>
                     <div class="form-actions">
                         <button type="submit" class="btn btn-primary">Salva</button>
@@ -361,9 +365,18 @@ window.showAddAthleteModal = async function () {
             </div>
         </div>
     `;
+    console.log('Modal template before setting innerHTML:', modalHTML);
+    modal.innerHTML = modalHTML;
 
     document.body.appendChild(modal);
     addModalStyles();
+
+    // Debug: log modal HTML to inspect content
+    console.log('Modal HTML:', modal.innerHTML);
+
+    // Debug: check if Scadenza Tesseramento ASC field exists
+    const ascField = modal.querySelector('#scadenzaTesseramentoAsc');
+    console.log('ScadenzaTesseramentoAsc field found:', ascField);
 
     // Set default date for iscrizione
     document.getElementById('dataIscrizione').value = new Date().toISOString().split('T')[0];
@@ -609,9 +622,9 @@ function addModalStyles() {
             .modal-content {
                 background: var(--bg-secondary);
                 border-radius: 12px;
-                max-width: 600px;
-                width: 90%;
-                max-height: 90vh;
+                max-width: 900px;
+                width: 95%;
+                max-height: 95vh;
                 overflow-y: auto;
             }
             .modal-header {

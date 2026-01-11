@@ -173,34 +173,22 @@ class DashboardPage {
                 </div>
             `;
             
-            // Make the whole card clickable
-            certElement.style.cursor = 'pointer';
-            certElement.addEventListener('click', (e) => {
-                console.log('Certificate clicked!', cert);
-                console.log('Target element:', e.target);
-                console.log('Navigating to:', `atleti.html?id=${cert.id}`);
-                
-                // Don't navigate if a button was clicked
-                if (!e.target.closest('button')) {
-                    console.log('No button clicked, proceeding with navigation');
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    // Navigate to athlete details page
-                    window.location.href = `atleti.html?id=${cert.id}`;
-                } else {
-                    console.log('Button was clicked, not navigating');
-                }
-            });
+            // Remove the whole card click handler to avoid conflicts
+            // Only the athlete name will be clickable for the modal
             
-            // Also add click listener to inner div for better UX
+            // Add click listener to athlete name div
             const certDiv = certElement.querySelector('.certificate-name');
             if (certDiv) {
                 certDiv.style.cursor = 'pointer';
+                certDiv.title = `Clicca per vedere l'anagrafica di ${cert.nome} ${cert.cognome}`;
                 certDiv.addEventListener('click', async (e) => {
                     console.log('Certificate div clicked!', cert);
+                    console.log('Event target:', e.target);
+                    console.log('Current target:', e.currentTarget);
+                    
                     e.preventDefault();
                     e.stopPropagation();
+                    e.stopImmediatePropagation();
                     
                     try {
                         // Show loading state
@@ -231,6 +219,8 @@ class DashboardPage {
                         showMessage('Errore nel caricamento dell\'anagrafica', 'error');
                     }
                 });
+            } else {
+                console.log('Certificate name div not found!');
             }
             
             container.appendChild(certElement);
@@ -244,6 +234,7 @@ class DashboardPage {
         console.log('renderExpiringMemberships called');
         
         const container = document.getElementById('expiringMemberships');
+        console.log('Container #expiringMemberships found:', container);
         
         if (!container) {
             console.log('Container #expiringMemberships not found - skipping expiring memberships render');
@@ -251,6 +242,7 @@ class DashboardPage {
         }
         
         console.log('Container found:', container);
+        console.log('this.expiringMemberships:', this.expiringMemberships);
 
         if (!this.expiringMemberships || this.expiringMemberships.length === 0) {
             console.log('No expiring memberships to display');
@@ -259,17 +251,21 @@ class DashboardPage {
                     <i class="fas fa-id-card"></i>
                     <div>Nessun tesseramento in scadenza nei prossimi 30 giorni</div>
                 </div>`;
+            console.log('Set no memberships message');
             return;
         }
 
         console.log('Rendering memberships:', this.expiringMemberships);
         
         // Sort by days to expiry (ascending)
-        const sortedMemberships = [...this.expiringMemberships].sort((a, b) => 
-            a.giorniAllaScadenza - b.giorniAllaScadenza
-        );
+        const sortedMemberships = [...this.expiringMemberships].sort((a, b) => {
+            const dateA = a.scadenzaTesseramentoAsc ? new Date(a.scadenzaTesseramentoAsc) : new Date();
+            const dateB = b.scadenzaTesseramentoAsc ? new Date(b.scadenzaTesseramentoAsc) : new Date();
+            return dateA - dateB;
+        });
 
         container.innerHTML = '';
+        console.log('Container cleared, adding memberships...');
 
         sortedMemberships.forEach((memb, index) => {
             console.log(`Processing membership ${index}:`, memb);
@@ -285,14 +281,17 @@ class DashboardPage {
                 })
                 : 'Data non disponibile';
 
-            // Calculate days to expiry if not provided
-            let daysToExpiry = memb.giorniAllaScadenza;
-            if ((daysToExpiry === undefined || daysToExpiry === null) && expiryDate) {
+            // Calculate days to expiry
+            let daysToExpiry;
+            if (expiryDate) {
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
                 const timeDiff = expiryDate.getTime() - today.getTime();
                 daysToExpiry = Math.ceil(timeDiff / (1000 * 3600 * 24));
+            } else {
+                daysToExpiry = 0;
             }
+            
             const expiryClass = daysToExpiry <= 7 ? 'danger' : 'warning';
             const expiryText = daysToExpiry === 0 ? 
                 'Scade oggi' : 
@@ -313,27 +312,62 @@ class DashboardPage {
                 </div>
             `;
             
-            // Make the whole card clickable
-            membElement.style.cursor = 'pointer';
-            membElement.addEventListener('click', (e) => {
-                console.log('Membership clicked!', memb);
-                console.log('Navigating to:', `atleti.html?id=${memb.id}`);
-                
-                // Don't navigate if a button was clicked
-                if (!e.target.closest('button')) {
+            // Remove the whole card click handler to avoid conflicts
+            // Only the athlete name will be clickable for the modal
+            
+            // Add click listener to athlete name div
+            const membDiv = membElement.querySelector('.certificate-name');
+            if (membDiv) {
+                membDiv.style.cursor = 'pointer';
+                membDiv.title = `Clicca per vedere l'anagrafica di ${memb.nome} ${memb.cognome}`;
+                membDiv.addEventListener('click', async (e) => {
+                    console.log('Membership div clicked!', memb);
+                    console.log('Event target:', e.target);
+                    console.log('Current target:', e.currentTarget);
+                    
                     e.preventDefault();
                     e.stopPropagation();
+                    e.stopImmediatePropagation();
                     
-                    // Navigate to athlete details page
-                    window.location.href = `atleti.html?id=${memb.id}`;
-                }
-            });
+                    try {
+                        // Show loading state
+                        showMessage('Caricamento anagrafica...', 'info');
+                        
+                        // Call API to get athlete details
+                        const athleteData = await api.getAthleteById(memb.id);
+                        console.log('Athlete data retrieved:', athleteData);
+                        
+                        // Get athlete's payments to find the last one
+                        const payments = await api.getPayments({ atletaId: memb.id });
+                        console.log('Payments retrieved:', payments);
+                        
+                        // Find the most recent payment
+                        const lastPayment = payments.length > 0 
+                            ? payments.sort((a, b) => new Date(b.data) - new Date(a.data))[0]
+                            : null;
+                        
+                        // Attach last payment info to athlete data
+                        athleteData.ultimoPagamento = lastPayment ? lastPayment.data : null;
+                        athleteData.importoUltimoPagamento = lastPayment ? lastPayment.importo : null;
+                        
+                        // Show athlete details in a modal or dedicated section
+                        this.showAthleteDetails(athleteData);
+                        
+                    } catch (error) {
+                        console.error('Error fetching athlete details:', error);
+                        showMessage('Errore nel caricamento dell\'anagrafica', 'error');
+                    }
+                });
+            } else {
+                console.log('Membership name div not found!');
+            }
             
             container.appendChild(membElement);
             console.log(`Membership ${index} added to container`);
         });
         
         console.log('All memberships rendered successfully');
+        console.log('Container HTML after rendering:', container.innerHTML);
     }
 
     showAthleteDetails(athlete) {
@@ -389,7 +423,7 @@ class DashboardPage {
                     <div class="section-grid">
                         <div><strong>Nome:</strong> ${athlete.nome || 'N/D'}</div>
                         <div><strong>Cognome:</strong> ${athlete.cognome || 'N/D'}</div>
-                        <div><strong>Codice Fiscale:</strong> ${athlete.codiceFiscale || 'N/D'}</div>
+                        <div><strong>Codice Fiscale:</strong> ${athlete.cf || athlete.codiceFiscale || 'N/D'}</div>
                         <div><strong>Data Nascita:</strong> ${formatDate(athlete.dataNascita)}</div>
                     </div>
                 </div>
@@ -420,6 +454,7 @@ class DashboardPage {
                             </span>
                         </div>
                         <div><strong>Certificato Medico:</strong> ${formatDate(athlete.dataScadenzaCertificato)}</div>
+                        <div><strong>Scadenza Tesseramento ASC:</strong> ${formatDate(athlete.scadenzaTesseramentoAsc)}</div>
                         <div><strong>Ultimo Pagamento:</strong> ${athlete.ultimoPagamento ? `${formatDate(athlete.ultimoPagamento)} (€${(athlete.importoUltimoPagamento || 0).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})` : 'Nessun pagamento'}</div>
                     </div>
                 </div>
