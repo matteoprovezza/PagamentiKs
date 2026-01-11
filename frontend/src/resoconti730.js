@@ -62,11 +62,10 @@ class Resoconti730Page {
         }
 
         if (totalRevenue2025El) {
-            const currentYear = new Date().getFullYear();
-            const yearlyTotal = this.payments
-                .filter(p => new Date(p.data).getFullYear() === currentYear)
+            const revenue2025 = this.payments
+                .filter(p => new Date(p.data).getFullYear() === 2025)
                 .reduce((sum, p) => sum + (p.importo || 0), 0);
-            totalRevenue2025El.textContent = `€ ${yearlyTotal.toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+            totalRevenue2025El.textContent = `€ ${revenue2025.toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
         }
     }
 

@@ -77,6 +77,7 @@ class DashboardPage {
     updateStats(stats) {
         const totalAthletesEl = document.getElementById('totalAthletes');
         const revenue2025El = document.getElementById('revenue2025');
+        const revenue2026El = document.getElementById('revenue2026');
         const receiptsToGenerateEl = document.getElementById('receiptsToGenerate');
 
         if (totalAthletesEl) {
@@ -85,11 +86,17 @@ class DashboardPage {
         }
 
         if (revenue2025El) {
-            const currentYear = new Date().getFullYear();
-            const yearlyTotal = this.payments
-                .filter(p => new Date(p.data).getFullYear() === currentYear)
+            const revenue2025 = this.payments
+                .filter(p => new Date(p.data).getFullYear() === 2025)
                 .reduce((sum, p) => sum + (p.importo || 0), 0);
-            revenue2025El.textContent = `€ ${yearlyTotal.toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+            revenue2025El.textContent = `€ ${revenue2025.toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+        }
+
+        if (revenue2026El) {
+            const revenue2026 = this.payments
+                .filter(p => new Date(p.data).getFullYear() === 2026)
+                .reduce((sum, p) => sum + (p.importo || 0), 0);
+            revenue2026El.textContent = `€ ${revenue2026.toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
         }
 
         if (receiptsToGenerateEl) {

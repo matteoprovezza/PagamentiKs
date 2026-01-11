@@ -44,20 +44,41 @@ class PagamentiPage {
                 importo: parseFloat(formData.get('amount')),
                 dataPagamento: formData.get('date'),
                 tipoPagamento: 'CONTANTI', // Default payment type
-                atletaId: formData.get('athlete') // Send only the ID
+                atleta: {
+                    id: formData.get('athlete')
+                }
             };
 
             try {
                 // Register payment first
-                await api.createPayment(payment);
+                const newPayment = await api.createPayment(payment);
                 showMessage('Pagamento registrato con successo!', 'success');
                 
-                // Then generate receipt
-                const athleteId = formData.get('athlete');
-                if (athleteId) {
+                // Generate receipt for the newly created payment
+                if (newPayment && newPayment.id) {
                     showMessage('Generazione ricevuta in corso...', 'info');
-                    await api.generateReceipt(parseInt(athleteId));
-                    showMessage('Ricevuta PDF generata con successo', 'success');
+                    
+                    // Call the new PDF endpoint
+                    const response = await fetch(`http://localhost:8080/api/v1/pagamenti/${newPayment.id}/ricevuta`);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    // Get the PDF blob
+                    const blob = await response.blob();
+                    
+                    // Create download link
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `ricevuta_pagamento_${newPayment.id}.pdf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                    
+                    showMessage('Ricevuta PDF generata e scaricata con successo', 'success');
                 }
                 
                 paymentForm.reset();
@@ -170,7 +191,7 @@ class PagamentiPage {
                         <button class="btn btn-sm btn-primary" onclick="editPayment(${payment.id})">
                             Modifica
                         </button>
-                        <button class="btn btn-sm btn-info" onclick="generateReceipt(${payment.atleta?.id || payment.atletaId})">
+                        <button class="btn btn-sm btn-info" onclick="generateAthleteReceipt(${payment.atleta?.id || payment.atletaId})">
                             Ricevuta
                         </button>
                         <button class="btn btn-sm btn-danger" onclick="deletePayment(${payment.id})">
@@ -354,6 +375,7 @@ window.showAddPaymentModal = async function() {
                     </div>
                     <div class="form-actions">
                         <button type="submit" class="btn btn-primary">Registra Pagamento</button>
+                        <button type="button" class="btn btn-success" onclick="handleAddPaymentAndGenerateReceipt()">Registra e Genera Ricevuta</button>
                         <button type="button" class="btn btn-secondary modal-cancel">Annulla</button>
                     </div>
                 </form>
@@ -482,19 +504,77 @@ window.deletePayment = async function(id) {
     }
 };
 
-window.generateReceipt = async function(athleteId) {
-    if (!athleteId) {
-        showMessage('Atleta non valido per la generazione della ricevuta', 'warning');
+window.generateReceipt = async function(paymentId) {
+    if (!paymentId) {
+        showMessage('ID pagamento non valido per la generazione della ricevuta', 'warning');
         return;
     }
 
     try {
         showMessage('Generazione ricevuta in corso...', 'info');
-        await api.generateReceipt(athleteId);
-        showMessage('Ricevuta PDF generata con successo', 'success');
+        
+        // Call the new PDF endpoint
+        const response = await fetch(`http://localhost:8080/api/v1/pagamenti/${paymentId}/ricevuta`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        // Get the PDF blob
+        const blob = await response.blob();
+        
+        // Create download link
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `ricevuta_pagamento_${paymentId}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        
+        showMessage('Ricevuta PDF generata e scaricata con successo', 'success');
+        
     } catch (error) {
         showMessage('Errore nella generazione della ricevuta', 'error');
         console.error('Error generating receipt:', error);
+    }
+};
+
+window.generateAthleteReceipt = async function(athleteId) {
+    if (!athleteId) {
+        showMessage('ID atleta non valido per la generazione della ricevuta', 'warning');
+        return;
+    }
+
+    try {
+        showMessage('Generazione ricevuta atleta in corso...', 'info');
+        
+        // Call the athlete PDF endpoint
+        const response = await fetch(`http://localhost:8080/api/v1/pagamenti/atleta/${athleteId}/ricevuta`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        // Get the PDF blob
+        const blob = await response.blob();
+        
+        // Create download link
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `ricevuta_atleta_${athleteId}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        
+        showMessage('Ricevuta PDF atleta generata e scaricata con successo', 'success');
+        
+    } catch (error) {
+        showMessage('Errore nella generazione della ricevuta atleta', 'error');
+        console.error('Error generating athlete receipt:', error);
     }
 };
 
@@ -576,6 +656,7 @@ window.showQuickPaymentForm = function(athleteId) {
                     </div>
                     <div class="form-actions">
                         <button type="submit" class="btn btn-primary">Registra Pagamento</button>
+                        <button type="button" class="btn btn-success" onclick="handleQuickPaymentAndGenerateReceipt(${athleteId})">Registra e Genera Ricevuta</button>
                         <button type="button" class="btn btn-secondary modal-cancel">Annulla</button>
                     </div>
                 </form>
@@ -611,9 +692,33 @@ window.hideQuickPaymentForm = function(athleteId) {
     // Questa funzione non è più necessaria con il modal, ma la lascio per compatibilità
 };
 
-window.submitQuickPayment = async function(athleteId) {
-    // Questa funzione è stata sostituita da handleModalQuickPayment
-    showMessage('Funzione deprecata. Usa il modal per i pagamenti rapidi.', 'info');
+window.registerPaymentWithoutReceipt = async function() {
+    if (!window.pagamentiPage.paymentForm) return;
+    
+    const paymentForm = window.pagamentiPage.paymentForm;
+    const formData = new FormData(paymentForm);
+    const payment = {
+        importo: parseFloat(formData.get('amount')),
+        dataPagamento: formData.get('date'),
+        tipoPagamento: 'CONTANTI', // Default payment type
+        atleta: {
+            id: formData.get('athlete')
+        }
+    };
+
+    try {
+        // Register payment first
+        const newPayment = await api.createPayment(payment);
+        showMessage('Pagamento registrato con successo!', 'success');
+        
+        paymentForm.reset();
+        // Set default date again
+        document.getElementById('date').value = new Date().toISOString().split('T')[0];
+        await window.pagamentiPage.loadPaymentsData();
+    } catch (error) {
+        showMessage('Errore nella registrazione del pagamento', 'error');
+        console.error('Error adding payment:', error);
+    }
 };
 
 async function handleModalQuickPayment(e, modal, athleteId) {
@@ -652,7 +757,7 @@ async function handleModalQuickPayment(e, modal, athleteId) {
             }
         };
 
-        await api.createPayment(payment);
+        const newPayment = await api.createPayment(payment);
         showMessage('Pagamento registrato con successo!', 'success');
         
         // Close the modal
@@ -665,6 +770,86 @@ async function handleModalQuickPayment(e, modal, athleteId) {
         console.error('Error adding quick payment:', error);
     }
 }
+
+window.handleQuickPaymentAndGenerateReceipt = async function(athleteId) {
+    const modal = document.querySelector('.modal');
+    if (!modal) return;
+    
+    const amountInput = document.getElementById(`modal-quick-amount-${athleteId}`);
+    const typeSelect = document.getElementById(`modal-quick-type-${athleteId}`);
+    const dateInput = document.getElementById(`modal-quick-date-${athleteId}`);
+    const noteInput = document.getElementById(`modal-quick-note-${athleteId}`);
+    
+    const amount = parseFloat(amountInput.value);
+    const paymentType = typeSelect.value;
+    const paymentDate = dateInput.value;
+    const note = noteInput.value;
+    
+    if (!amount || amount <= 0) {
+        showMessage('Inserisci un importo valido', 'warning');
+        amountInput.focus();
+        return;
+    }
+    
+    if (!paymentDate) {
+        showMessage('Seleziona una data di pagamento', 'warning');
+        dateInput.focus();
+        return;
+    }
+    
+    try {
+        showMessage('Registrazione pagamento in corso...', 'info');
+        
+        const payment = {
+            importo: amount,
+            dataPagamento: paymentDate,
+            tipoPagamento: paymentType,
+            note: note || null,
+            atleta: {
+                id: athleteId
+            }
+        };
+
+        const newPayment = await api.createPayment(payment);
+        showMessage('Pagamento registrato con successo!', 'success');
+        
+        // Generate receipt for the newly created payment
+        if (newPayment && newPayment.id) {
+            showMessage('Generazione ricevuta in corso...', 'info');
+            
+            // Call the PDF endpoint
+            const response = await fetch(`http://localhost:8080/api/v1/pagamenti/${newPayment.id}/ricevuta`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            // Get the PDF blob
+            const blob = await response.blob();
+            
+            // Create download link
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `ricevuta_pagamento_${newPayment.id}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            showMessage('Ricevuta PDF generata e scaricata con successo', 'success');
+        }
+        
+        // Close the modal
+        removeModal(modal);
+        
+        // Reload data
+        await window.pagamentiPage.loadPaymentsData();
+    } catch (error) {
+        showMessage('Errore nella registrazione del pagamento o generazione ricevuta', 'error');
+        console.error('Error adding quick payment and generating receipt:', error);
+    }
+};
 
 window.viewAthletePayments = async function(athleteId) {
     console.log('viewAthletePayments called with athleteId:', athleteId);
@@ -833,9 +1018,25 @@ window.generatePaymentReceipt = async function(athleteId, paymentId) {
     try {
         showMessage('Generazione ricevuta in corso...', 'info');
         
-        // Use the existing API to generate receipt for the athlete
-        // The backend should generate receipt for the specific payment
-        await api.generateReceipt(athleteId);
+        // Generate receipt for the specific payment using the payment endpoint
+        const response = await fetch(`http://localhost:8080/api/v1/pagamenti/${paymentId}/ricevuta`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        // Get the PDF blob
+        const blob = await response.blob();
+        
+        // Create download link
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `ricevuta_pagamento_${paymentId}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
         
         showMessage('Ricevuta PDF generata con successo!', 'success');
     } catch (error) {
@@ -867,6 +1068,65 @@ async function handleAddPayment(e, modal) {
         console.error('Error adding payment:', error);
     }
 }
+
+window.handleAddPaymentAndGenerateReceipt = async function() {
+    const modal = document.querySelector('.modal');
+    if (!modal) return;
+    
+    const form = modal.querySelector('#add-payment-form');
+    if (!form) return;
+    
+    const formData = new FormData(form);
+    const payment = {
+        importo: parseFloat(formData.get('importo')),
+        dataPagamento: formData.get('data'),
+        tipoPagamento: formData.get('paymentType'),
+        atleta: {
+            id: formData.get('athlete')
+        }
+    };
+
+    try {
+        showMessage('Registrazione pagamento in corso...', 'info');
+        
+        // Register payment first
+        const newPayment = await api.createPayment(payment);
+        showMessage('Pagamento registrato con successo!', 'success');
+        
+        // Generate receipt for the newly created payment
+        if (newPayment && newPayment.id) {
+            showMessage('Generazione ricevuta in corso...', 'info');
+            
+            // Call the PDF endpoint
+            const response = await fetch(`http://localhost:8080/api/v1/pagamenti/${newPayment.id}/ricevuta`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            // Get the PDF blob
+            const blob = await response.blob();
+            
+            // Create download link
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `ricevuta_pagamento_${newPayment.id}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            showMessage('Ricevuta PDF generata e scaricata con successo', 'success');
+        }
+        
+        removeModal(modal);
+        await window.pagamentiPage.loadPaymentsData();
+    } catch (error) {
+        showMessage('Errore nella registrazione del pagamento o generazione ricevuta', 'error');
+        console.error('Error adding payment and generating receipt:', error);
+    }
+};
 
 async function handleEditPayment(e, modal) {
     e.preventDefault();

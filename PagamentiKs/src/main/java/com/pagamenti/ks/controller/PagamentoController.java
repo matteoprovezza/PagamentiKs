@@ -1,17 +1,26 @@
 package com.pagamenti.ks.controller;
 
+import com.itextpdf.text.DocumentException;
+import com.pagamenti.ks.model.Atleta;
 import com.pagamenti.ks.model.Pagamento;
 import com.pagamenti.ks.model.enums.TipoPagamento;
 import com.pagamenti.ks.service.PagamentoService;
+import com.pagamenti.ks.service.PdfService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 @RestController
 @RequestMapping("/api/v1/pagamenti")
@@ -19,9 +28,12 @@ import java.util.List;
 public class PagamentoController {
 
     private final PagamentoService pagamentoService;
+    private final PdfService pdfService;
+    private final AtomicLong receiptCounter = new AtomicLong(1);
 
-    public PagamentoController(PagamentoService pagamentoService) {
+    public PagamentoController(PagamentoService pagamentoService, PdfService pdfService) {
         this.pagamentoService = pagamentoService;
+        this.pdfService = pdfService;
     }
 
     @GetMapping
@@ -153,10 +165,104 @@ public class PagamentoController {
         return ResponseEntity.ok(total);
     }
     
+    @GetMapping("/{id}/ricevuta")
+    @Operation(summary = "Generate PDF receipt for payment")
+    public ResponseEntity<byte[]> generateRicevuta(@PathVariable Long id) {
+        try {
+            System.out.println("Generating receipt for payment ID: " + id);
+            
+            // Get payment details
+            Pagamento pagamento = pagamentoService.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Pagamento non trovato con id: " + id));
+            
+            System.out.println("Payment found: " + pagamento.getId() + ", athlete: " + pagamento.getAtleta());
+            
+            // Get athlete details
+            Atleta atleta = pagamento.getAtleta();
+            if (atleta == null) {
+                System.out.println("Athlete is null in payment object, trying to get from atletaId");
+                // If athlete is not loaded, fetch it separately
+                Long atletaId = pagamento.getAtletaId();
+                if (atletaId != null) {
+                    atleta = pagamentoService.findAtletaById(atletaId)
+                            .orElseThrow(() -> new RuntimeException("Atleta non trovato con id: " + atletaId));
+                } else {
+                    System.out.println("Both atleta and atletaId are null");
+                    return ResponseEntity.badRequest().build();
+                }
+            }
+            
+            System.out.println("Athlete found: " + (atleta != null ? "success" : "null") + 
+                (atleta.getNome() != null ? atleta.getNome() : "N/A") + " " + 
+                (atleta.getCognome() != null ? atleta.getCognome() : "N/A"));
+            
+            // Generate receipt number
+            String numeroRicevuta = String.format("%03d", receiptCounter.getAndIncrement());
+            
+            // Generate PDF
+            byte[] pdfContent = pdfService.generateRicevuta(pagamento, atleta, numeroRicevuta);
+            
+            System.out.println("PDF generated successfully, size: " + pdfContent.length + " bytes");
+            
+            // Set response headers
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDispositionFormData("attachment", 
+                "ricevuta_" + (atleta != null ? atleta.getCognome() + "_" + atleta.getNome() : "unknown") + ".pdf");
+            
+            return new ResponseEntity<>(pdfContent, headers, HttpStatus.OK);
+            
+        } catch (RuntimeException e) {
+            System.out.println("RuntimeException: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.notFound().build();
+        } catch (IOException | DocumentException e) {
+            System.out.println("IOException/DocumentException: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        } catch (Exception e) {
+            System.out.println("Generic Exception: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+    
     @GetMapping("/atleta/{atletaId}/ricevuta")
     @Operation(summary = "Generate PDF receipt for athlete's latest payment")
-    public ResponseEntity<String> generateRicevuta(@PathVariable Long atletaId) {
-        // Implementazione temporanea - restituisce un messaggio invece di generare il PDF
-        return ResponseEntity.ok("Generazione ricevuta non ancora implementata per l'atleta " + atletaId);
+    public ResponseEntity<byte[]> generateRicevutaForAthlete(@PathVariable Long atletaId) {
+        try {
+            // Get athlete's payments
+            List<Pagamento> pagamenti = pagamentoService.findByAtleta(atletaId);
+            
+            if (pagamenti.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+            
+            // Get the most recent payment
+            Pagamento pagamento = pagamenti.get(pagamenti.size() - 1);
+            
+            // Get athlete details
+            Atleta atleta = pagamentoService.findAtletaById(atletaId)
+                    .orElseThrow(() -> new RuntimeException("Atleta non trovato con id: " + atletaId));
+            
+            // Generate receipt number
+            String numeroRicevuta = String.format("%03d", receiptCounter.getAndIncrement());
+            
+            // Generate PDF
+            byte[] pdfContent = pdfService.generateRicevuta(pagamento, atleta, numeroRicevuta);
+            
+            // Set response headers
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDispositionFormData("attachment", 
+                "ricevuta_" + atleta.getCognome() + "_" + atleta.getNome() + ".pdf");
+            
+            return new ResponseEntity<>(pdfContent, headers, HttpStatus.OK);
+            
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IOException | DocumentException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 }

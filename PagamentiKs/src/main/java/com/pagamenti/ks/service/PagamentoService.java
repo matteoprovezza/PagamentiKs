@@ -30,7 +30,9 @@ public class PagamentoService {
     }
 
     public Optional<Pagamento> findById(Long id) {
-        return pagamentoRepository.findById(id);
+        return pagamentoRepository.findAllWithAtleta().stream()
+                .filter(p -> p.getId().equals(id))
+                .findFirst();
     }
 
     public Pagamento save(Pagamento pagamento) {
@@ -98,5 +100,9 @@ public class PagamentoService {
     
     public List<Pagamento> findByTipoPagamento(TipoPagamento tipo) {
         return pagamentoRepository.findByTipoPagamentoWithAtleta(tipo);
+    }
+    
+    public Optional<Atleta> findAtletaById(Long atletaId) {
+        return atletaRepository.findById(atletaId);
     }
 }
