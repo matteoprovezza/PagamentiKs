@@ -90,7 +90,18 @@ public class PagamentoController {
     @PostMapping
     @Operation(summary = "Create a new payment")
     public ResponseEntity<Pagamento> create(@RequestBody Pagamento pagamento) {
-        return ResponseEntity.ok(pagamentoService.save(pagamento));
+        try {
+            // Handle case where athlete is nested object
+            if (pagamento.getAtleta() != null && pagamento.getAtleta().getId() != null) {
+                // If athlete is properly set in the payment object, use createPagamento
+                return ResponseEntity.ok(pagamentoService.createPagamento(pagamento.getAtleta().getId(), pagamento));
+            } else {
+                // Otherwise, save directly (for cases where athlete might not be set)
+                return ResponseEntity.ok(pagamentoService.save(pagamento));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
     
     @PostMapping("/atleta/{atletaId}")

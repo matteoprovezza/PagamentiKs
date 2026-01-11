@@ -1,3 +1,20 @@
+// Toggle function for payment form
+function togglePaymentForm() {
+    const container = document.getElementById('payment-form-container');
+    const icon = document.getElementById('payment-form-icon');
+    const toggleBtn = document.getElementById('payment-form-toggle');
+    
+    if (container.style.display === 'none') {
+        container.style.display = 'block';
+        icon.className = 'fas fa-chevron-up';
+        toggleBtn.classList.remove('collapsed');
+    } else {
+        container.style.display = 'none';
+        icon.className = 'fas fa-chevron-down';
+        toggleBtn.classList.add('collapsed');
+    }
+}
+
 // Payments management functionality
 class PagamentiPage {
     constructor() {
@@ -25,12 +42,9 @@ class PagamentiPage {
             const formData = new FormData(paymentForm);
             const payment = {
                 importo: parseFloat(formData.get('amount')),
-                data: formData.get('date'),
+                dataPagamento: formData.get('date'),
                 tipoPagamento: 'CONTANTI', // Default payment type
-                metodoPagamento: 'Contanti',
-                atleta: {
-                    id: formData.get('athlete')
-                }
+                atletaId: formData.get('athlete') // Send only the ID
             };
 
             try {
@@ -74,25 +88,8 @@ class PagamentiPage {
                 console.log('First payment structure:', JSON.stringify(this.payments[0], null, 2));
             }
             
-            // Enrich payments with athlete data if needed
-            this.payments = this.payments.map(payment => {
-                if (!payment.atleta || !payment.atleta.nome) {
-                    const athleteId = payment.atleta?.id || payment.atletaId;
-                    if (athleteId) {
-                        const athlete = this.athletes.find(a => a.id == athleteId);
-                        if (athlete) {
-                            payment.atleta = {
-                                id: athlete.id,
-                                nome: athlete.nome,
-                                cognome: athlete.cognome
-                            };
-                        }
-                    }
-                }
-                return payment;
-            });
-            
-            this.updatePaymentsTable();
+            // Update all UI components
+            await this.updatePaymentsTable();
             this.updateAthleteFilter();
             this.updatePaymentFormAthletes();
             this.updateAthletesQuickPaymentGrid();
@@ -105,7 +102,7 @@ class PagamentiPage {
             // Show empty state when backend is unavailable
             this.athletes = [];
             this.payments = [];
-            this.updatePaymentsTable();
+            await this.updatePaymentsTable();
             this.updateAthleteFilter();
             this.updatePaymentFormAthletes();
             this.updateAthletesQuickPaymentGrid();
@@ -146,17 +143,17 @@ class PagamentiPage {
         }
     }
 
-    updatePaymentsTable() {
+    async updatePaymentsTable() {
         const tableBody = document.getElementById('payments-table-body');
         if (!tableBody) return;
 
         tableBody.innerHTML = '';
 
-        this.payments.forEach(payment => {
+        for (const payment of this.payments) {
             const row = document.createElement('tr');
             
-            // Get athlete name - either from payment.atleta or by looking up by ID
-            const athleteName = this.getAthleteName(payment);
+            // Get athlete name - now async
+            const athleteName = await this.getAthleteName(payment);
             
             row.innerHTML = `
                 <td>${formatDate(payment.data)}</td>
@@ -184,14 +181,14 @@ class PagamentiPage {
             `;
             
             tableBody.appendChild(row);
-        });
+        }
 
         if (this.payments.length === 0) {
             tableBody.innerHTML = '<tr><td colspan="6" class="empty-row">Nessun pagamento trovato</td></tr>';
         }
     }
 
-    getAthleteName(payment) {
+    async getAthleteName(payment) {
         console.log('Getting athlete name for payment:', payment);
         
         // First try to get from payment.atleta object
@@ -203,18 +200,37 @@ class PagamentiPage {
         // Try all possible ID fields
         const athleteId = payment.atleta?.id || payment.atletaId || payment.atleta_id || payment.athleteId;
         console.log('Trying to find athlete by ID:', athleteId);
-        console.log('Available athletes:', this.athletes);
         
-        if (athleteId && this.athletes.length > 0) {
-            // Try multiple comparison methods
-            let athlete = this.athletes.find(a => a.id == athleteId);
-            if (!athlete) athlete = this.athletes.find(a => a.id === athleteId);
-            if (!athlete) athlete = this.athletes.find(a => a.id === parseInt(athleteId));
-            if (!athlete) athlete = this.athletes.find(a => a.id == parseInt(athleteId));
+        if (athleteId) {
+            try {
+                // Make API call to get athlete data
+                const athlete = await api.getAthleteById(athleteId);
+                console.log('Found athlete from API:', athlete);
+                
+                if (athlete && athlete.nome && athlete.cognome) {
+                    // Cache the athlete data for future use
+                    payment.atleta = {
+                        id: athlete.id,
+                        nome: athlete.nome,
+                        cognome: athlete.cognome
+                    };
+                    return `${athlete.nome} ${athlete.cognome}`;
+                }
+            } catch (error) {
+                console.error('Error fetching athlete data:', error);
+            }
             
-            console.log('Found athlete:', athlete);
-            if (athlete) {
-                return `${athlete.nome} ${athlete.cognome}`;
+            // Fallback to local athletes cache
+            if (this.athletes.length > 0) {
+                let athlete = this.athletes.find(a => a.id == athleteId);
+                if (!athlete) athlete = this.athletes.find(a => a.id === athleteId);
+                if (!athlete) athlete = this.athletes.find(a => a.id === parseInt(athleteId));
+                if (!athlete) athlete = this.athletes.find(a => a.id == parseInt(athleteId));
+                
+                console.log('Found athlete in local cache:', athlete);
+                if (athlete) {
+                    return `${athlete.nome} ${athlete.cognome}`;
+                }
             }
         }
         
@@ -496,7 +512,7 @@ window.filterPayments = async function() {
         if (dateTo) filters.toDate = dateTo;
 
         window.pagamentiPage.payments = await api.getPayments(filters);
-        window.pagamentiPage.updatePaymentsTable();
+        await window.pagamentiPage.updatePaymentsTable();
     } catch (error) {
         showMessage('Errore nel filtraggio dei pagamenti', 'error');
         console.error('Error filtering payments:', error);
@@ -628,9 +644,8 @@ async function handleModalQuickPayment(e, modal, athleteId) {
     try {
         const payment = {
             importo: amount,
-            data: paymentDate,
+            dataPagamento: paymentDate,
             tipoPagamento: paymentType,
-            metodoPagamento: paymentType === 'CONTANTI' ? 'Contanti' : 'Bonifico Bancario',
             note: note || null,
             atleta: {
                 id: athleteId
@@ -835,9 +850,8 @@ async function handleAddPayment(e, modal) {
     const formData = new FormData(e.target);
     const payment = {
         importo: parseFloat(formData.get('importo')),
-        data: formData.get('data'),
+        dataPagamento: formData.get('data'),
         tipoPagamento: formData.get('paymentType'),
-        metodoPagamento: formData.get('metodoPagamento') || formData.get('paymentType'),
         atleta: {
             id: formData.get('athlete')
         }
@@ -862,9 +876,8 @@ async function handleEditPayment(e, modal) {
     
     const payment = {
         importo: parseFloat(formData.get('importo')),
-        data: formData.get('data'),
+        dataPagamento: formData.get('data'),
         tipoPagamento: formData.get('paymentType'),
-        metodoPagamento: formData.get('metodoPagamento') || formData.get('paymentType'),
         atleta: {
             id: formData.get('athlete')
         }

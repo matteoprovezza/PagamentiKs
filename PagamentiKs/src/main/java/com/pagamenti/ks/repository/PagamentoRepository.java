@@ -12,11 +12,21 @@ import java.util.List;
 
 @Repository
 public interface PagamentoRepository extends JpaRepository<Pagamento, Long> {
-    List<Pagamento> findByAtletaId(Long atletaId);
+    @Query("SELECT p FROM Pagamento p JOIN FETCH p.atleta")
+    List<Pagamento> findAllWithAtleta();
+    
+    @Query("SELECT p FROM Pagamento p JOIN FETCH p.atleta WHERE p.atleta.id = :atletaId")
+    List<Pagamento> findByAtletaIdWithAtleta(@Param("atletaId") Long atletaId);
+    
+    @Query("SELECT p FROM Pagamento p JOIN FETCH p.atleta WHERE p.tipoPagamento = :tipoPagamento")
+    List<Pagamento> findByTipoPagamentoWithAtleta(@Param("tipoPagamento") TipoPagamento tipoPagamento);
     
     List<Pagamento> findByTipoPagamento(TipoPagamento tipoPagamento);
     
-    @Query("SELECT p FROM Pagamento p WHERE p.dataPagamento BETWEEN :startDate AND :endDate")
+    @Query("SELECT p FROM Pagamento p JOIN FETCH p.atleta WHERE p.data BETWEEN :startDate AND :endDate")
+    List<Pagamento> findBetweenDatesWithAtleta(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+    
+    @Query("SELECT p FROM Pagamento p WHERE p.data BETWEEN :startDate AND :endDate")
     List<Pagamento> findBetweenDates(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
     
     @Query("SELECT SUM(p.importo) FROM Pagamento p WHERE p.atleta.id = :atletaId")
@@ -34,5 +44,8 @@ public interface PagamentoRepository extends JpaRepository<Pagamento, Long> {
         @Param("tipo") TipoPagamento tipo
     );
     
-    List<Pagamento> findByDataPagamentoAfter(LocalDate date);
+    List<Pagamento> findByDataAfter(LocalDate date);
+    
+    @Query("SELECT p FROM Pagamento p JOIN FETCH p.atleta WHERE p.data > :date")
+    List<Pagamento> findByDataAfterWithAtleta(@Param("date") LocalDate date);
 }

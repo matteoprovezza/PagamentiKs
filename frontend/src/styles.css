@@ -592,6 +592,48 @@ body {
     margin: 0;
 }
 
+/* Collapsible Header Styles */
+.collapsible-header {
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.3s ease;
+}
+
+.collapsible-header:hover {
+    background-color: var(--border-color);
+}
+
+.toggle-btn {
+    background: none;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    min-width: 36px;
+    min-height: 36px;
+}
+
+.toggle-btn:hover {
+    background-color: var(--border-color);
+    color: var(--text-primary);
+    transform: scale(1.05);
+}
+
+.toggle-btn i {
+    transition: transform 0.3s ease;
+    font-size: 16px;
+}
+
+.toggle-btn.collapsed i {
+    transform: rotate(-90deg);
+}
+
 .card-content {
     padding: 20px;
 }

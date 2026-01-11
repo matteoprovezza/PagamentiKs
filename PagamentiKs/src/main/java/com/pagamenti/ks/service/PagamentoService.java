@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,7 +26,7 @@ public class PagamentoService {
     }
 
     public List<Pagamento> findAll() {
-        return pagamentoRepository.findAll();
+        return pagamentoRepository.findAllWithAtleta();
     }
 
     public Optional<Pagamento> findById(Long id) {
@@ -33,16 +34,24 @@ public class PagamentoService {
     }
 
     public Pagamento save(Pagamento pagamento) {
-        return pagamentoRepository.save(pagamento);
+        // Handle case where athlete is nested object
+        if (pagamento.getAtleta() != null && pagamento.getAtleta().getId() != null) {
+            // If athlete is properly set in the payment object, use createPagamento
+            return createPagamento(pagamento.getAtleta().getId(), pagamento);
+        } else {
+            // Otherwise, save directly (for cases where athlete might not be set)
+            return pagamentoRepository.save(pagamento);
+        }
     }
 
     public Pagamento createPagamento(Long atletaId, Pagamento pagamento) {
         Atleta atleta = atletaRepository.findById(atletaId)
                 .orElseThrow(() -> new RuntimeException("Atleta non trovato con id: " + atletaId));
-        List<Pagamento> pagamenti = List.of(pagamento);
-        atleta.setPagamenti(pagamenti);
-
-        //pagamento.setAtleta(atleta);
+        
+        // Set the athlete for the payment
+        pagamento.setAtleta(atleta);
+        
+        // Save the payment - cascade will handle the relationship
         return pagamentoRepository.save(pagamento);
     }
 
@@ -62,16 +71,16 @@ public class PagamentoService {
     }
 
     public List<Pagamento> findByAtleta(Long atletaId) {
-        return pagamentoRepository.findByAtletaId(atletaId);
+        return pagamentoRepository.findByAtletaIdWithAtleta(atletaId);
     }
 
     public List<Pagamento> findByDateRange(LocalDate startDate, LocalDate endDate) {
-        return pagamentoRepository.findBetweenDates(startDate, endDate);
+        return pagamentoRepository.findBetweenDatesWithAtleta(startDate, endDate);
     }
 
     public List<Pagamento> findByMetodoPagamento(String metodoPagamento) {
         TipoPagamento tipoPagamento = TipoPagamento.fromValue(metodoPagamento);
-        return pagamentoRepository.findByTipoPagamento(tipoPagamento);
+        return pagamentoRepository.findByTipoPagamentoWithAtleta(tipoPagamento);
     }
 
     public Double getTotalPaymentsByAtleta(Long atletaId) {
@@ -80,7 +89,7 @@ public class PagamentoService {
 
     public List<Pagamento> findRecentPayments(int days) {
         LocalDate cutoffDate = LocalDate.now().minusDays(days);
-        return pagamentoRepository.findByDataPagamentoAfter(cutoffDate);
+        return pagamentoRepository.findByDataAfterWithAtleta(cutoffDate);
     }
     
     public Double getTotalPagamentiByAtletaIdAndTipo(Long atletaId, TipoPagamento tipo) {
@@ -88,6 +97,6 @@ public class PagamentoService {
     }
     
     public List<Pagamento> findByTipoPagamento(TipoPagamento tipo) {
-        return pagamentoRepository.findByTipoPagamento(tipo);
+        return pagamentoRepository.findByTipoPagamentoWithAtleta(tipo);
     }
 }

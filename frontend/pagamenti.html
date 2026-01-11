@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pagamenti - Karate Manager</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="src/styles.css">
     <script src="src/api.js"></script>
+    <script src="src/navigation.js"></script>
     <script src="src/pagamenti.js"></script>
 </head>
 <body>
@@ -22,7 +24,7 @@
                     <li>
                         <a href="atleti.html">Gestione Atleti</a>
                     </li>
-                    <li class="active">
+                    <li>
                         <a href="pagamenti.html">Pagamenti</a>
                     </li>
                     <li>
@@ -40,10 +42,13 @@
             <div class="dashboard-content">
                 <!-- Registra Nuovo Pagamento Section -->
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header collapsible-header" onclick="togglePaymentForm()">
                         <h2>Registra Nuovo Pagamento</h2>
+                        <button class="toggle-btn" id="payment-form-toggle">
+                            <i class="fas fa-chevron-down" id="payment-form-icon"></i>
+                        </button>
                     </div>
-                    <div class="card-content">
+                    <div class="card-content" id="payment-form-container" style="display: none;">
                         <form class="payment-form">
                             <div class="form-group">
                                 <label for="athlete">Seleziona Atleta</label>

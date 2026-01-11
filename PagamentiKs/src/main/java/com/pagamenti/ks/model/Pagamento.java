@@ -17,7 +17,7 @@ public class Pagamento {
     private Long id;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "atleta_id")
+    @JoinColumn(name = "atleta_id", nullable = false)
     @JsonBackReference
     @Schema(description = "Athlete who made the payment")
     private Atleta atleta;
@@ -26,16 +26,20 @@ public class Pagamento {
     @Schema(description = "Payment amount", example = "50.00")
     private Double importo;
     
-    @Column(name = "data_pagamento", columnDefinition = "DATE DEFAULT CURRENT_DATE", nullable = false)
+    @Column(name = "data", columnDefinition = "DATE DEFAULT CURRENT_DATE", nullable = false)
     @Schema(description = "Payment date", example = "2024-12-28")
-    private LocalDate dataPagamento = LocalDate.now();
-    
+    private LocalDate data = LocalDate.now();
+
     // Legacy/transient field for compatibility
     @Transient
-    private LocalDate data;
+    private LocalDate dataPagamento;
     
     @Transient
     private String metodoPagamento;
+    
+    // Field to include athlete ID in JSON response
+    @Transient
+    private Long atletaId;
     
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo_pagamento", nullable = false)
@@ -63,12 +67,20 @@ public class Pagamento {
     }
 
     public LocalDate getData() {
-        return data != null ? data : dataPagamento;
+        return data;
     }
 
     public void setData(LocalDate data) {
         this.data = data;
-        this.dataPagamento = data;
+    }
+
+    public LocalDate getDataPagamento() {
+        return dataPagamento != null ? dataPagamento : data;
+    }
+
+    public void setDataPagamento(LocalDate dataPagamento) {
+        this.dataPagamento = dataPagamento;
+        this.data = dataPagamento;
     }
 
     public String getMetodoPagamento() {
@@ -94,5 +106,21 @@ public class Pagamento {
 
     public void setAtleta(Atleta atleta) {
         this.atleta = atleta;
+        // Update atletaId when atleta is set
+        if (atleta != null) {
+            this.atletaId = atleta.getId();
+        }
+    }
+    
+    public Long getAtletaId() {
+        // Return atletaId if set, otherwise get from atleta relationship
+        if (atletaId != null) {
+            return atletaId;
+        }
+        return atleta != null ? atleta.getId() : null;
+    }
+
+    public void setAtletaId(Long atletaId) {
+        this.atletaId = atletaId;
     }
 }
