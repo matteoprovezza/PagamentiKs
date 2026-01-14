@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:13
+    container_name: gestionale_KS_PROD_db
+    environment:
+      POSTGRES_DB: pagamenti_db_prod
+      POSTGRES_USER: prod_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5432:5432"  # Stessa porta dell'ambiente di sviluppo
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+    networks:
+      - gestionale_PROD_network
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U prod_user -d pagamenti_db_prod"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    image: gestionale_ks_prod_app:latest
+    build:
+      context: ..
+      dockerfile: PagamentiKs/Dockerfile
+      args:
+        - PROFILE=prod
+    container_name: gestionale_KS_PROD_app
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/pagamenti_db_prod
+      - SPRING_DATASOURCE_USERNAME=prod_user
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=validate
+      - SPRING_PROFILES_ACTIVE=prod
+      - SERVER_PORT=8080
+    ports:
+      - "8080:8080"  # Stessa porta dell'ambiente di sviluppo
+    networks:
+      - gestionale_PROD_network
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  frontend:
+    image: gestionale_ks_prod_frontend:latest
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile.prod
+    container_name: gestionale_KS_PROD_frontend
+    depends_on:
+      - app
+    ports:
+      - "3000:3000"  # Stessa porta dell'ambiente di sviluppo
+    networks:
+      - gestionale_PROD_network
+    restart: always
+    environment:
+      - NODE_ENV=production
+      - REACT_APP_API_URL=http://localhost:8081
+
+networks:
+  gestionale_PROD_network:
+    driver: bridge
+
+volumes:
+  postgres_data_prod:

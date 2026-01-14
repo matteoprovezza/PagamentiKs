@@ -418,7 +418,7 @@ window.editPayment = async function(id) {
                 </div>
                 <div class="modal-body">
                     <form id="edit-payment-form">
-                        <input type="hidden" id="payment-id" value="${payment.id}">
+                        <input type="hidden" id="payment-id" name="payment-id" value="${payment.id}">
                         <div class="form-group">
                             <label for="athlete">Atleta*</label>
                             <select id="athlete" name="athlete" required>
