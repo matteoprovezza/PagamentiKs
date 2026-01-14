@@ -161,6 +161,10 @@ class ApiClient {
         return this.request(`/pagamenti/atleta/${atletaId}/ricevuta`);
     }
 
+    async generate730Report(atletaId) {
+        return this.request(`/pagamenti/atleta/${atletaId}/resoconto730`);
+    }
+
     async getPaymentsByDateRange(startDate, endDate) {
         return this.request(`/pagamenti/date-range?startDate=${startDate}&endDate=${endDate}`);
     }

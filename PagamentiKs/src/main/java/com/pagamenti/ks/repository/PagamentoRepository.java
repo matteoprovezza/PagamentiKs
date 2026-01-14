@@ -48,4 +48,11 @@ public interface PagamentoRepository extends JpaRepository<Pagamento, Long> {
     
     @Query("SELECT p FROM Pagamento p JOIN FETCH p.atleta WHERE p.data > :date")
     List<Pagamento> findByDataAfterWithAtleta(@Param("date") LocalDate date);
+    
+    @Query("SELECT p FROM Pagamento p JOIN FETCH p.atleta WHERE p.atleta.id = :atletaId AND p.data BETWEEN :startDate AND :endDate")
+    List<Pagamento> findByAtletaIdAndDataBetweenWithAtleta(
+        @Param("atletaId") Long atletaId, 
+        @Param("startDate") LocalDate startDate, 
+        @Param("endDate") LocalDate endDate
+    );
 }

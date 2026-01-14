@@ -102,6 +102,10 @@ public class PagamentoService {
         return pagamentoRepository.findByTipoPagamentoWithAtleta(tipo);
     }
     
+    public List<Pagamento> findByAtletaAndDateRange(Long atletaId, LocalDate startDate, LocalDate endDate) {
+        return pagamentoRepository.findByAtletaIdAndDataBetweenWithAtleta(atletaId, startDate, endDate);
+    }
+    
     public Optional<Atleta> findAtletaById(Long atletaId) {
         return atletaRepository.findById(atletaId);
     }

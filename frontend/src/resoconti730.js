@@ -47,25 +47,28 @@ class Resoconti730Page {
 
     updateStats(stats) {
         const totalAthletesEl = document.getElementById('totalAthletes');
-        const generatedReportsEl = document.getElementById('generatedReports');
-        const totalRevenue2025El = document.getElementById('totalRevenue2025');
+        const totalRevenueCurrentEl = document.getElementById('totalRevenueCurrent');
+        const totalRevenuePreviousEl = document.getElementById('totalRevenuePrevious');
 
         if (totalAthletesEl) {
             const totalAthletes = this.athletes.filter(a => a.attivo).length;
             totalAthletesEl.textContent = totalAthletes;
         }
 
-        if (generatedReportsEl) {
-            // Simulate generated reports count
-            const generatedReports = Math.floor(this.athletes.length * 0.7); // 70% of athletes have reports
-            generatedReportsEl.textContent = generatedReports;
+        if (totalRevenueCurrentEl) {
+            const currentYear = new Date().getFullYear();
+            const revenueCurrent = this.payments
+                .filter(p => new Date(p.data).getFullYear() === currentYear)
+                .reduce((sum, p) => sum + (p.importo || 0), 0);
+            totalRevenueCurrentEl.textContent = `€ ${revenueCurrent.toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
         }
 
-        if (totalRevenue2025El) {
-            const revenue2025 = this.payments
-                .filter(p => new Date(p.data).getFullYear() === 2025)
+        if (totalRevenuePreviousEl) {
+            const previousYear = new Date().getFullYear() - 1;
+            const revenuePrevious = this.payments
+                .filter(p => new Date(p.data).getFullYear() === previousYear)
                 .reduce((sum, p) => sum + (p.importo || 0), 0);
-            totalRevenue2025El.textContent = `€ ${revenue2025.toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+            totalRevenuePreviousEl.textContent = `€ ${revenuePrevious.toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
         }
     }
 
@@ -82,7 +85,12 @@ class Resoconti730Page {
             
             // Calculate total payments for this athlete
             const athletePayments = this.payments.filter(p => p.atletaId === athlete.id);
-            const totalPayments = athletePayments.reduce((sum, p) => sum + (p.importo || 0), 0);
+            const currentYearTotal = athletePayments
+                .filter(p => new Date(p.data).getFullYear() === new Date().getFullYear())
+                .reduce((sum, p) => sum + (p.importo || 0), 0);
+            const previousYearTotal = athletePayments
+                .filter(p => new Date(p.data).getFullYear() === new Date().getFullYear() - 1)
+                .reduce((sum, p) => sum + (p.importo || 0), 0);
             
             row.innerHTML = `
                 <td>${athlete.nome}</td>
@@ -90,7 +98,8 @@ class Resoconti730Page {
                 <td>${athlete.email || 'N/D'}</td>
                 <td>${athlete.telefono || 'N/D'}</td>
                 <td>${athlete.dataIscrizione ? formatDate(athlete.dataIscrizione) : 'N/D'}</td>
-                <td><strong>${formatCurrency(totalPayments)}</strong></td>
+                <td><strong>${formatCurrency(currentYearTotal)}</strong></td>
+                <td><strong>${formatCurrency(previousYearTotal)}</strong></td>
                 <td>
                     <span class="status-badge ${athlete.attivo ? 'active' : 'inactive'}">
                         ${athlete.attivo ? 'Attivo' : 'Disattivato'}
@@ -112,7 +121,7 @@ class Resoconti730Page {
         });
 
         if (this.athletes.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="8" class="empty-row">Nessun atleta trovato</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="9" class="empty-row">Nessun atleta trovato</td></tr>';
         }
     }
 
@@ -171,15 +180,27 @@ window.generate730Report = async function(athleteId) {
 
         showMessage(`Generazione resoconto 730 per ${athlete.nome} ${athlete.cognome}...`, 'info');
         
-        // Call API to generate 730 report
-        // This would be a new API endpoint like: api.generate730Report(athleteId)
-        // For now, simulate the API call
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Call API to generate 730 report PDF
+        const response = await fetch(`http://localhost:8080/api/v1/pagamenti/atleta/${athleteId}/resoconto730`);
         
-        showMessage(`✅ Resoconto 730 generato per ${athlete.nome} ${athlete.cognome}`, 'success');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
         
-        // In a real implementation, this would trigger a PDF download
-        // window.open('/api/v1/reports/730/' + athleteId, '_blank');
+        // Get the PDF blob
+        const blob = await response.blob();
+        
+        // Create download link
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `resoconto_730_${athlete.cognome}_${athlete.nome}_${new Date().getFullYear() - 1}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        
+        showMessage(`✅ Resoconto 730 generato e scaricato per ${athlete.nome} ${athlete.cognome}`, 'success');
         
     } catch (error) {
         console.error('Error generating 730 report:', error);
@@ -190,7 +211,7 @@ window.generate730Report = async function(athleteId) {
 window.generateAll730Reports = async function() {
     console.log('Generating all 730 reports...');
     
-    if (!confirm('Sei sicuro di voler generare tutti i resoconti 730? Questa operazione potrebbe richiedere del tempo.')) {
+    if (!confirm('Sei sicuro di voler generare e scaricare tutti i resoconti 730? Questa operazione potrebbe richiedere del tempo.')) {
         return;
     }
 
@@ -202,24 +223,46 @@ window.generateAll730Reports = async function() {
             return;
         }
 
-        showMessage(`Generazione di ${activeAthletes.length} resoconti 730 in corso...`, 'info');
+        showMessage(`Generazione e download di ${activeAthletes.length} resoconti 730 in corso...`, 'info');
         
-        // Simulate batch generation
+        // Generate and download reports for each active athlete
         for (let i = 0; i < activeAthletes.length; i++) {
             const athlete = activeAthletes[i];
             console.log(`Generating report ${i + 1}/${activeAthletes.length} for ${athlete.nome} ${athlete.cognome}`);
             
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 500));
+            try {
+                // Call API to generate 730 report
+                const response = await fetch(`http://localhost:8080/api/v1/pagamenti/atleta/${athlete.id}/resoconto730`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                // Get the PDF blob
+                const blob = await response.blob();
+                
+                // Create download link
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `resoconto_730_${athlete.cognome}_${athlete.nome}_${new Date().getFullYear() - 1}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+                
+                console.log(`Successfully downloaded report for ${athlete.nome} ${athlete.cognome}`);
+                
+            } catch (error) {
+                console.error(`Error generating report for ${athlete.nome} ${athlete.cognome}:`, error);
+                showMessage(`Errore nel generare il resoconto per ${athlete.nome} ${athlete.cognome}`, 'error');
+            }
+            
+            // Small delay between downloads to avoid overwhelming the browser
+            await new Promise(resolve => setTimeout(resolve, 1000));
         }
         
-        showMessage(`✅ Generati ${activeAthletes.length} resoconti 730 con successo`, 'success');
-        
-        // Update stats
-        const generatedReportsEl = document.getElementById('generatedReports');
-        if (generatedReportsEl) {
-            generatedReportsEl.textContent = activeAthletes.length;
-        }
+        showMessage(`✅ Completato il download di ${activeAthletes.length} resoconti 730`, 'success');
         
     } catch (error) {
         console.error('Error generating all 730 reports:', error);
@@ -251,7 +294,15 @@ window.viewAthletePayments = async function(athleteId) {
                 <div class="modal-body">
                     <div class="payments-summary">
                         <div class="summary-item">
-                            <span class="summary-label">Totale Pagamenti:</span>
+                            <span class="summary-label">Totale Pagamenti Anno Corrente:</span>
+                            <span class="summary-value">${formatCurrency(calculateCurrentYearTotal(payments))}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Totale Pagamenti Anno Precedente:</span>
+                            <span class="summary-value">${formatCurrency(calculatePreviousYearTotal(payments))}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Totale Generale:</span>
                             <span class="summary-value">${formatCurrency(payments.reduce((sum, p) => sum + (p.importo || 0), 0))}</span>
                         </div>
                         <div class="summary-item">
@@ -453,6 +504,20 @@ function removeModal(modal) {
     if (modal && modal.parentNode) {
         modal.parentNode.removeChild(modal);
     }
+}
+
+function calculateCurrentYearTotal(payments) {
+    const currentYear = new Date().getFullYear();
+    return payments
+        .filter(p => new Date(p.data).getFullYear() === currentYear)
+        .reduce((sum, p) => sum + (p.importo || 0), 0);
+}
+
+function calculatePreviousYearTotal(payments) {
+    const previousYear = new Date().getFullYear() - 1;
+    return payments
+        .filter(p => new Date(p.data).getFullYear() === previousYear)
+        .reduce((sum, p) => sum + (p.importo || 0), 0);
 }
 
 // Initialize resoconti730 page

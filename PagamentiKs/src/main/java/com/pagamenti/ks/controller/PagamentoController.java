@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.Year;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
@@ -262,6 +263,55 @@ public class PagamentoController {
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         } catch (IOException | DocumentException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+    
+    @GetMapping("/atleta/{atletaId}/resoconto730")
+    @Operation(summary = "Generate 730 report PDF for athlete's previous year payments")
+    public ResponseEntity<byte[]> generateResoconto730(@PathVariable Long atletaId) {
+        try {
+            System.out.println("Generating 730 report for athlete ID: " + atletaId);
+            
+            // Get athlete details
+            Atleta atleta = pagamentoService.findAtletaById(atletaId)
+                    .orElseThrow(() -> new RuntimeException("Atleta non trovato con id: " + atletaId));
+            
+            // Calculate previous year
+            int previousYear = Year.now().minusYears(1).getValue();
+            
+            // Get payments for previous year
+            LocalDate startDate = LocalDate.of(previousYear, 1, 1);
+            LocalDate endDate = LocalDate.of(previousYear, 12, 31);
+            
+            List<Pagamento> pagamenti = pagamentoService.findByAtletaAndDateRange(atletaId, startDate, endDate);
+            
+            System.out.println("Found " + pagamenti.size() + " payments for year " + previousYear);
+            
+            // Generate PDF
+            byte[] pdfContent = pdfService.generateResoconto730(atleta, pagamenti, previousYear);
+            
+            System.out.println("730 PDF generated successfully, size: " + pdfContent.length + " bytes");
+            
+            // Set response headers
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDispositionFormData("attachment", 
+                "resoconto_730_" + atleta.getCognome() + "_" + atleta.getNome() + "_" + previousYear + ".pdf");
+            
+            return new ResponseEntity<>(pdfContent, headers, HttpStatus.OK);
+            
+        } catch (RuntimeException e) {
+            System.out.println("RuntimeException: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.notFound().build();
+        } catch (IOException | DocumentException e) {
+            System.out.println("IOException/DocumentException: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        } catch (Exception e) {
+            System.out.println("Generic Exception: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
