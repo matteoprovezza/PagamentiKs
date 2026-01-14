@@ -326,10 +326,7 @@ window.showAddAthleteModal = async function () {
                             <label for="dataIscrizione">Data Iscrizione</label>
                             <input type="date" id="dataIscrizione" name="dataIscrizione">
                         </div>
-                        <div class="form-group">
-                            <label for="scadenzaTesseramentoAsc">Scadenza Tesseramento ASC</label>
-                            <input type="date" id="scadenzaTesseramentoAsc" name="scadenzaTesseramentoAsc">
-                        </div>
+
                     </div>
                     <div class="form-group">
                         <label for="indirizzo">Indirizzo</label>
@@ -349,10 +346,10 @@ window.showAddAthleteModal = async function () {
                         <label for="dataScadenzaCertificato">Data Scadenza Certificato Medico</label>
                         <input type="date" id="dataScadenzaCertificato" name="dataScadenzaCertificato">
                     </div>
-                    <div class="form-group">
-                        <label for="scadenzaTesseramentoAsc">Scadenza Tesseramento ASC</label>
-                        <input type="date" id="scadenzaTesseramentoAsc" name="scadenzaTesseramentoAsc">
-                    </div>
+                        <div class="form-group">
+                            <label for="scadenzaTesseramentoAsc">Scadenza Tesseramento ASC</label>
+                            <input type="date" id="scadenzaTesseramentoAsc" name="scadenzaTesseramentoAsc">
+                        </div>
                     <div class="form-group">
                         <label for="note">Note</label>
                         <textarea id="note" name="note" rows="3"></textarea>
