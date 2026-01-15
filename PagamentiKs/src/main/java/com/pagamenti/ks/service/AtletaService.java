@@ -126,7 +126,6 @@ public class AtletaService {
         return atletaRepository.findAll().stream()
                 .filter(atleta -> Boolean.TRUE.equals(atleta.isAttivo()) &&
                         atleta.getDataScadenzaCertificato() != null &&
-                        !atleta.getDataScadenzaCertificato().isBefore(today) &&
                         !atleta.getDataScadenzaCertificato().isAfter(dateLimit))
                 .toList();
     }
@@ -137,7 +136,6 @@ public class AtletaService {
         return atletaRepository.findAll().stream()
                 .filter(atleta -> Boolean.TRUE.equals(atleta.isAttivo()) &&
                         atleta.getScadenzaTesseramentoAsc() != null &&
-                        !atleta.getScadenzaTesseramentoAsc().isBefore(today) &&
                         !atleta.getScadenzaTesseramentoAsc().isAfter(dateLimit))
                 .toList();
     }
@@ -148,7 +146,6 @@ public class AtletaService {
         return atletaRepository.findAll().stream()
                 .filter(atleta -> Boolean.TRUE.equals(atleta.isAttivo()) &&
                         atleta.getScadenzaTesseramentoAsc() != null &&
-                        !atleta.getScadenzaTesseramentoAsc().isBefore(today) &&
                         !atleta.getScadenzaTesseramentoAsc().isAfter(dateLimit))
                 .toList();
     }
@@ -159,7 +156,6 @@ public class AtletaService {
         return atletaRepository.findAll().stream()
                 .filter(atleta -> Boolean.TRUE.equals(atleta.isAttivo()) &&
                         atleta.getScadenzaTesseramentoFijlkam() != null &&
-                        !atleta.getScadenzaTesseramentoFijlkam().isBefore(today) &&
                         !atleta.getScadenzaTesseramentoFijlkam().isAfter(dateLimit))
                 .toList();
     }
