@@ -65,6 +65,10 @@ public class AtletaService {
                     logger.info("Imposto scadenzaTesseramentoAsc a: {}", nuovaScadenza);
                     atleta.setScadenzaTesseramentoAsc(nuovaScadenza);
 
+                    LocalDate nuovaScadenzaFijlkam = atletaDetails.getScadenzaTesseramentoFijlkam();
+                    logger.info("Imposto scadenzaTesseramentoFijlkam a: {}", nuovaScadenzaFijlkam);
+                    atleta.setScadenzaTesseramentoFijlkam(nuovaScadenzaFijlkam);
+
                     atleta.setDataIscrizione(atletaDetails.getDataIscrizione());
                     if (atletaDetails.isAttivo() != null) {
                         atleta.setAttivo(atletaDetails.isAttivo());
@@ -146,6 +150,17 @@ public class AtletaService {
                         atleta.getScadenzaTesseramentoAsc() != null &&
                         !atleta.getScadenzaTesseramentoAsc().isBefore(today) &&
                         !atleta.getScadenzaTesseramentoAsc().isAfter(dateLimit))
+                .toList();
+    }
+
+    public List<Atleta> findAthletesWithExpiringFijlkamMembership(int daysBefore) {
+        LocalDate today = LocalDate.now();
+        LocalDate dateLimit = LocalDate.now().plusDays(daysBefore);
+        return atletaRepository.findAll().stream()
+                .filter(atleta -> Boolean.TRUE.equals(atleta.isAttivo()) &&
+                        atleta.getScadenzaTesseramentoFijlkam() != null &&
+                        !atleta.getScadenzaTesseramentoFijlkam().isBefore(today) &&
+                        !atleta.getScadenzaTesseramentoFijlkam().isAfter(dateLimit))
                 .toList();
     }
 }

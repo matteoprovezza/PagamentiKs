@@ -326,9 +326,15 @@ window.showAddAthleteModal = async function () {
                             <label for="dataIscrizione">Data Iscrizione</label>
                             <input type="date" id="dataIscrizione" name="dataIscrizione">
                         </div>
+                    </div>
+                    <div class="form-row">
                         <div class="form-group">
                             <label for="scadenzaTesseramentoAsc">Scadenza Tesseramento ASC</label>
                             <input type="date" id="scadenzaTesseramentoAsc" name="scadenzaTesseramentoAsc">
+                        </div>
+                        <div class="form-group">
+                            <label for="scadenzaTesseramentoFijlkam">Scadenza Tesseramento FIJLKAM</label>
+                            <input type="date" id="scadenzaTesseramentoFijlkam" name="scadenzaTesseramentoFijlkam">
                         </div>
                     </div>
                     <div class="form-group">
@@ -348,10 +354,6 @@ window.showAddAthleteModal = async function () {
                     <div class="form-group">
                         <label for="dataScadenzaCertificato">Data Scadenza Certificato Medico</label>
                         <input type="date" id="dataScadenzaCertificato" name="dataScadenzaCertificato">
-                    </div>
-                    <div class="form-group">
-                        <label for="scadenzaTesseramentoAsc">Scadenza Tesseramento ASC</label>
-                        <input type="date" id="scadenzaTesseramentoAsc" name="scadenzaTesseramentoAsc">
                     </div>
                     <div class="form-group">
                         <label for="note">Note</label>
@@ -535,6 +537,7 @@ async function handleAddAthlete(e, modal) {
         note: formData.get('note'),
         dataScadenzaCertificato: formData.get('dataScadenzaCertificato') || null,
         scadenzaTesseramentoAsc: formData.get('scadenzaTesseramentoAsc') || null,
+        scadenzaTesseramentoFijlkam: formData.get('scadenzaTesseramentoFijlkam') || null,
         attivo: true
     };
 
