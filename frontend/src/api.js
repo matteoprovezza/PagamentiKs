@@ -69,6 +69,11 @@ class ApiClient {
         return this.request(`/atleti/expiring-memberships?days=${days}`);
     }
 
+    // Get athletes with expiring FIJLKAM memberships
+    async getExpiringFijlkamMemberships(days = 30) {
+        return this.request(`/atleti/expiring-fijlkam-memberships?days=${days}`);
+    }
+
     async getAthleteById(id) {
         return this.request(`/atleti/${id}`);
     }

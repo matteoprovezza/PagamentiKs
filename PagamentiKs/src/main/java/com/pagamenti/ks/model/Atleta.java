@@ -53,6 +53,11 @@ public class Atleta {
     @JsonProperty("scadenzaTesseramentoAsc")
     private LocalDate scadenzaTesseramentoAsc;
     
+    @Column(name = "scadenza_tesseramento_fijlkam", nullable = true)
+    @Schema(description = "Scadenza tesseramento FIJLKAM", example = "2024-12-31")
+    @JsonProperty("scadenzaTesseramentoFijlkam")
+    private LocalDate scadenzaTesseramentoFijlkam;
+    
     @Column(nullable = true)
     private String note;
     
@@ -156,6 +161,14 @@ public class Atleta {
 
     public void setScadenzaTesseramentoAsc(LocalDate scadenzaTesseramentoAsc) {
         this.scadenzaTesseramentoAsc = scadenzaTesseramentoAsc;
+    }
+
+    public LocalDate getScadenzaTesseramentoFijlkam() {
+        return scadenzaTesseramentoFijlkam;
+    }
+
+    public void setScadenzaTesseramentoFijlkam(LocalDate scadenzaTesseramentoFijlkam) {
+        this.scadenzaTesseramentoFijlkam = scadenzaTesseramentoFijlkam;
     }
 
     public String getNote() {

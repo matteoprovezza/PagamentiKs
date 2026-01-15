@@ -233,6 +233,14 @@ class AthletiPage {
                     </div>
                 </div>
                 
+                <div class="profile-section">
+                    <h3>Tesseramento FIJLKAM</h3>
+                    <div class="profile-field">
+                        <label>Scadenza Tesseramento:</label>
+                        <span>${athlete.scadenzaTesseramentoFijlkam ? formatDate(athlete.scadenzaTesseramentoFijlkam) : 'Non specificata'}</span>
+                    </div>
+                </div>
+                
                 ${athlete.note ? `
                 <div class="profile-section full-width">
                     <h3>Note</h3>
@@ -326,7 +334,19 @@ window.showAddAthleteModal = async function () {
                             <label for="dataIscrizione">Data Iscrizione</label>
                             <input type="date" id="dataIscrizione" name="dataIscrizione">
                         </div>
+<<<<<<< HEAD
 
+=======
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="scadenzaTesseramentoAsc">Scadenza Tesseramento ASC</label>
+                            <input type="date" id="scadenzaTesseramentoAsc" name="scadenzaTesseramentoAsc">
+                        </div>
+                        <div class="form-group">
+                            <label for="scadenzaTesseramentoFijlkam">Scadenza Tesseramento FIJLKAM</label>
+                            <input type="date" id="scadenzaTesseramentoFijlkam" name="scadenzaTesseramentoFijlkam">
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="indirizzo">Indirizzo</label>
@@ -346,10 +366,6 @@ window.showAddAthleteModal = async function () {
                         <label for="dataScadenzaCertificato">Data Scadenza Certificato Medico</label>
                         <input type="date" id="dataScadenzaCertificato" name="dataScadenzaCertificato">
                     </div>
-                        <div class="form-group">
-                            <label for="scadenzaTesseramentoAsc">Scadenza Tesseramento ASC</label>
-                            <input type="date" id="scadenzaTesseramentoAsc" name="scadenzaTesseramentoAsc">
-                        </div>
                     <div class="form-group">
                         <label for="note">Note</label>
                         <textarea id="note" name="note" rows="3"></textarea>
@@ -444,10 +460,17 @@ window.editAthlete = async function (id) {
                             <input type="date" id="dataScadenzaCertificato" name="dataScadenzaCertificato" 
                                    value="${athlete.dataScadenzaCertificato || ''}">
                         </div>
-                        <div class="form-group">
-                            <label for="scadenzaTesseramentoAsc">Scadenza Tesseramento ASC</label>
-                            <input type="date" id="scadenzaTesseramentoAsc" name="scadenzaTesseramentoAsc" 
-                                   value="${athlete.scadenzaTesseramentoAsc || ''}">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="scadenzaTesseramentoAsc">Scadenza Tesseramento ASC</label>
+                                <input type="date" id="scadenzaTesseramentoAsc" name="scadenzaTesseramentoAsc" 
+                                       value="${athlete.scadenzaTesseramentoAsc || ''}">
+                            </div>
+                            <div class="form-group">
+                                <label for="scadenzaTesseramentoFijlkam">Scadenza Tesseramento FIJLKAM</label>
+                                <input type="date" id="scadenzaTesseramentoFijlkam" name="scadenzaTesseramentoFijlkam" 
+                                       value="${athlete.scadenzaTesseramentoFijlkam || ''}">
+                            </div>
                         </div>
                         <div class="form-group">
                             <label for="note">Note</label>
@@ -532,6 +555,7 @@ async function handleAddAthlete(e, modal) {
         note: formData.get('note'),
         dataScadenzaCertificato: formData.get('dataScadenzaCertificato') || null,
         scadenzaTesseramentoAsc: formData.get('scadenzaTesseramentoAsc') || null,
+        scadenzaTesseramentoFijlkam: formData.get('scadenzaTesseramentoFijlkam') || null,
         attivo: true
     };
 
@@ -572,7 +596,8 @@ async function handleEditAthlete(e, modal) {
         indirizzo: formData.get('indirizzo') || null,
         note: formData.get('note') || null,
         dataScadenzaCertificato: formData.get('dataScadenzaCertificato') || null,
-        scadenzaTesseramentoAsc: formData.get('scadenzaTesseramentoAsc') || null
+        scadenzaTesseramentoAsc: formData.get('scadenzaTesseramentoAsc') || null,
+        scadenzaTesseramentoFijlkam: formData.get('scadenzaTesseramentoFijlkam') || null
     };
 
     // Validate required fields

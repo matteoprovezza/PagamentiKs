@@ -39,9 +39,15 @@ class DashboardPage {
             this.expiringMemberships = await api.getExpiringMemberships(30);
             console.log('Expiring memberships loaded:', this.expiringMemberships.length, this.expiringMemberships);
             
+            // Load expiring FIJLKAM memberships
+            console.log('Fetching expiring FIJLKAM memberships...');
+            this.expiringFijlkamMemberships = await api.getExpiringFijlkamMemberships(30);
+            console.log('Expiring FIJLKAM memberships loaded:', this.expiringFijlkamMemberships.length, this.expiringFijlkamMemberships);
+            
             this.updateStats(stats);
             this.renderExpiringCertificates();
             this.renderExpiringMemberships();
+            this.renderExpiringFijlkamMemberships();
             console.log('Dashboard updated successfully');
             
         } catch (error) {
@@ -377,6 +383,143 @@ class DashboardPage {
         console.log('Container HTML after rendering:', container.innerHTML);
     }
 
+    renderExpiringFijlkamMemberships() {
+        console.log('renderExpiringFijlkamMemberships called');
+        
+        const container = document.getElementById('expiringFijlkamMemberships');
+        console.log('Container #expiringFijlkamMemberships found:', container);
+        
+        if (!container) {
+            console.log('Container #expiringFijlkamMemberships not found - skipping expiring FIJLKAM memberships render');
+            return;
+        }
+        
+        console.log('Container found:', container);
+        console.log('this.expiringFijlkamMemberships:', this.expiringFijlkamMemberships);
+
+        if (!this.expiringFijlkamMemberships || this.expiringFijlkamMemberships.length === 0) {
+            console.log('No expiring FIJLKAM memberships to display');
+            container.innerHTML = `
+                <div class="no-certificates">
+                    <i class="fas fa-id-card"></i>
+                    <div>Nessun tesseramento FIJLKAM in scadenza nei prossimi 30 giorni</div>
+                </div>`;
+            console.log('Set no FIJLKAM memberships message');
+            return;
+        }
+
+        console.log('Rendering FIJLKAM memberships:', this.expiringFijlkamMemberships);
+        
+        // Sort by days to expiry (ascending)
+        const sortedMemberships = [...this.expiringFijlkamMemberships].sort((a, b) => {
+            const dateA = a.scadenzaTesseramentoFijlkam ? new Date(a.scadenzaTesseramentoFijlkam) : new Date();
+            const dateB = b.scadenzaTesseramentoFijlkam ? new Date(b.scadenzaTesseramentoFijlkam) : new Date();
+            return dateA - dateB;
+        });
+
+        container.innerHTML = '';
+        console.log('Container cleared, adding FIJLKAM memberships...');
+
+        sortedMemberships.forEach((memb, index) => {
+            console.log(`Processing FIJLKAM membership ${index}:`, memb);
+            
+            // Ensure we have a valid date
+            const expiryDate = memb.scadenzaTesseramentoFijlkam ? new Date(memb.scadenzaTesseramentoFijlkam) : null;
+            const formattedDate = expiryDate && !isNaN(expiryDate) 
+                ? expiryDate.toLocaleDateString('it-IT', {
+                    weekday: 'long',
+                    day: '2-digit',
+                    month: 'long',
+                    year: 'numeric'
+                })
+                : 'Data non disponibile';
+
+            // Calculate days to expiry
+            let daysToExpiry;
+            if (expiryDate) {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const timeDiff = expiryDate.getTime() - today.getTime();
+                daysToExpiry = Math.ceil(timeDiff / (1000 * 3600 * 24));
+            } else {
+                daysToExpiry = 0;
+            }
+            
+            const expiryClass = daysToExpiry <= 7 ? 'danger' : 'warning';
+            const expiryText = daysToExpiry === 0 ? 
+                'Scade oggi' : 
+                daysToExpiry === 1 ? 
+                    'Scade domani' : 
+                    `Scade tra ${daysToExpiry} giorni`;
+
+            const membElement = document.createElement('li');
+            membElement.className = 'certificate-item';
+            membElement.innerHTML = `
+                <div class="certificate-name" title="Vai ai dettagli di ${memb.nome} ${memb.cognome}">
+                    <i class="fas fa-id-card"></i>
+                    ${memb.nome} ${memb.cognome}
+                    <span class="certificate-expiry ${expiryClass}" title="${formattedDate}">
+                        <i class="fas ${expiryClass === 'danger' ? 'fa-exclamation-circle' : 'fa-calendar-alt'}"></i>
+                        ${expiryText}
+                    </span>
+                </div>
+            `;
+            
+            // Add click listener to athlete name div
+            const membDiv = membElement.querySelector('.certificate-name');
+            if (membDiv) {
+                membDiv.style.cursor = 'pointer';
+                membDiv.title = `Clicca per vedere l'anagrafica di ${memb.nome} ${memb.cognome}`;
+                membDiv.addEventListener('click', async (e) => {
+                    console.log('FIJLKAM membership div clicked!', memb);
+                    console.log('Event target:', e.target);
+                    console.log('Current target:', e.currentTarget);
+                    
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    
+                    try {
+                        // Show loading state
+                        showMessage('Caricamento anagrafica...', 'info');
+                        
+                        // Call API to get athlete details
+                        const athleteData = await api.getAthleteById(memb.id);
+                        console.log('Athlete data retrieved:', athleteData);
+                        
+                        // Get athlete's payments to find last one
+                        const payments = await api.getPayments({ atletaId: memb.id });
+                        console.log('Payments retrieved:', payments);
+                        
+                        // Find most recent payment
+                        const lastPayment = payments.length > 0 
+                            ? payments.sort((a, b) => new Date(b.data) - new Date(a.data))[0]
+                            : null;
+                        
+                        // Attach last payment info to athlete data
+                        athleteData.ultimoPagamento = lastPayment ? lastPayment.data : null;
+                        athleteData.importoUltimoPagamento = lastPayment ? lastPayment.importo : null;
+                        
+                        // Show athlete details in a modal or dedicated section
+                        this.showAthleteDetails(athleteData);
+                        
+                    } catch (error) {
+                        console.error('Error fetching athlete details:', error);
+                        showMessage('Errore nel caricamento dell\'anagrafica', 'error');
+                    }
+                });
+            } else {
+                console.log('FIJLKAM membership name div not found!');
+            }
+            
+            container.appendChild(membElement);
+            console.log(`FIJLKAM membership ${index} added to container`);
+        });
+        
+        console.log('All FIJLKAM memberships rendered successfully');
+        console.log('Container HTML after rendering:', container.innerHTML);
+    }
+
     showAthleteDetails(athlete) {
         // Create modal overlay
         const modalOverlay = document.createElement('div');
@@ -462,6 +605,7 @@ class DashboardPage {
                         </div>
                         <div><strong>Certificato Medico:</strong> ${formatDate(athlete.dataScadenzaCertificato)}</div>
                         <div><strong>Scadenza Tesseramento ASC:</strong> ${formatDate(athlete.scadenzaTesseramentoAsc)}</div>
+                        <div><strong>Scadenza Tesseramento FIJLKAM:</strong> ${formatDate(athlete.scadenzaTesseramentoFijlkam)}</div>
                         <div><strong>Ultimo Pagamento:</strong> ${athlete.ultimoPagamento ? `${formatDate(athlete.ultimoPagamento)} (€${(athlete.importoUltimoPagamento || 0).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})` : 'Nessun pagamento'}</div>
                     </div>
                 </div>
