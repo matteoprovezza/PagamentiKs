@@ -334,9 +334,6 @@ window.showAddAthleteModal = async function () {
                             <label for="dataIscrizione">Data Iscrizione</label>
                             <input type="date" id="dataIscrizione" name="dataIscrizione">
                         </div>
-<<<<<<< HEAD
-
-=======
                     </div>
                     <div class="form-row">
                         <div class="form-group">
