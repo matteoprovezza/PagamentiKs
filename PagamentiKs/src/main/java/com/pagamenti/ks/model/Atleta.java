@@ -40,15 +40,15 @@ public class Atleta {
     @Column(nullable = true)
     private String email;
     
-    @Column(name = "data_iscrizione", nullable = true)
+    @Column(name = "dataiscrizione", nullable = true)
     @Schema(description = "Data di iscrizione dell'atleta")
     private LocalDate dataIscrizione;
     
-    @Column(name = "data_scadenza_certificato", nullable = true)
+    @Column(name = "datascadenzacertificato", nullable = true)
     @Schema(description = "Data di scadenza del certificato medico")
     private LocalDate dataScadenzaCertificato;
     
-    @Column(name = "scadenza_tesseramento_asc", nullable = true)
+    @Column(name = "scadenzatesseramentoasc", nullable = true)
     @Schema(description = "Scadenza tesseramento ASC", example = "2024-12-31")
     @JsonProperty("scadenzaTesseramentoAsc")
     private LocalDate scadenzaTesseramentoAsc;
