@@ -44,7 +44,7 @@ class PagamentiPage {
                 importo: parseFloat(formData.get('amount')),
                 dataPagamento: formData.get('date'),
                 tipoPagamento: 'CONTANTI', // Default payment type
-                detraibile: formData.get('detraibile') === 'on',
+                detraibile: formData.get('detraibile') === 'true',
                 atleta: {
                     id: formData.get('athlete')
                 }
@@ -380,10 +380,11 @@ window.showAddPaymentModal = async function() {
                         <textarea id="note" name="note" rows="3"></textarea>
                     </div>
                     <div class="form-group">
-                        <label>
-                            <input type="checkbox" id="detraibile" name="detraibile" checked>
-                            Detraibile (includi nel resoconto 730)
-                        </label>
+                        <label for="detraibile">Detraibile: includi nel resoconto 730</label>
+                        <select id="detraibile" name="detraibile" checked>
+                            <option value="true">SI</option>
+                            <option value="false">NO</option>
+                        </select>
                     </div>
                     <div class="form-actions">
                         <button type="submit" class="btn btn-primary">Registra Pagamento</button>
@@ -463,10 +464,11 @@ window.editPayment = async function(id) {
                                    placeholder="Es: Contanti, Bonifico Bancario">
                         </div>
                         <div class="form-group">
-                            <label>
-                                <input type="checkbox" id="detraibile" name="detraibile" ${payment.detraibile !== false ? 'checked' : ''}>
-                                Detraibile (includi nel resoconto 730)
-                            </label>
+                            <label for="detraibile">Detraibile: includi nel resoconto 730</label>
+                            <select id="detraibile" name="detraibile" ${payment.detraibile !== false ? '' : 'selected'}>
+                                <option value="true">SI</option>
+                                <option value="false">NO</option>
+                            </select>
                         </div>
                         <div class="form-actions">
                             <button type="submit" class="btn btn-primary">Aggiorna</button>
@@ -669,14 +671,15 @@ window.showQuickPaymentForm = function(athleteId) {
                         <input type="date" id="modal-quick-date-${athleteId}" required>
                     </div>
                     <div class="form-group">
-                        <label for="modal-quick-note-${athleteId}">Note</label>
-                        <textarea id="modal-quick-note-${athleteId}" rows="3" placeholder="Note opzionali sul pagamento..."></textarea>
+                        <label for="modal-quick-detraibile-${athleteId}">Detraibile: includi nel resoconto 730</label>
+                        <select id="modal-quick-detraibile-${athleteId}" name="detraibile" checked>
+                            <option value="true">SI</option>
+                            <option value="false">NO</option>
+                        </select>
                     </div>
                     <div class="form-group">
-                        <label>
-                            <input type="checkbox" id="modal-quick-detraibile-${athleteId}" name="detraibile" checked>
-                            Detraibile (includi nel resoconto 730)
-                        </label>
+                        <label for="modal-quick-note-${athleteId}">Note</label>
+                        <textarea id="modal-quick-note-${athleteId}" rows="3" placeholder="Note opzionali sul pagamento..."></textarea>
                     </div>
                     <div class="form-actions">
                         <button type="submit" class="btn btn-primary">Registra Pagamento</button>
@@ -1082,7 +1085,7 @@ async function handleAddPayment(e, modal) {
         tipoPagamento: formData.get('paymentType'),
         metodoPagamento: formData.get('metodoPagamento'),
         note: formData.get('note'),
-        detraibile: formData.get('detraibile') === 'on',
+        detraibile: formData.get('detraibile') === 'true',
         atleta: {
             id: formData.get('athlete')
         }
@@ -1113,7 +1116,7 @@ window.handleAddPaymentAndGenerateReceipt = async function() {
         tipoPagamento: formData.get('paymentType'),
         metodoPagamento: formData.get('metodoPagamento'),
         note: formData.get('note'),
-        detraibile: formData.get('detraibile') === 'on',
+        detraibile: formData.get('detraibile') === 'true',
         atleta: {
             id: formData.get('athlete')
         }
@@ -1172,7 +1175,7 @@ async function handleEditPayment(e, modal) {
         dataPagamento: formData.get('data'),
         tipoPagamento: formData.get('paymentType'),
         metodoPagamento: formData.get('metodoPagamento'),
-        detraibile: formData.get('detraibile') === 'on',
+        detraibile: formData.get('detraibile') === 'true',
         atleta: {
             id: formData.get('athlete')
         }

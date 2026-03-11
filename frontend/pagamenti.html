@@ -65,10 +65,11 @@
                                 <input type="date" id="date" name="date" required>
                             </div>
                             <div class="form-group">
-                                <label>
-                                    <input type="checkbox" id="detraibile" name="detraibile" checked>
-                                    Detraibile (includi nel resoconto 730)
-                                </label>
+                                <label for="detraibile">Detraibile: includi nel resoconto 730</label>
+                                <select id="detraibile" name="detraibile" checked>
+                                    <option value="true">SI</option>
+                                    <option value="false">NO</option>
+                                </select>
                             </div>
                             <button type="submit" class="btn btn-primary" id="registerAndGenerateReceipt">Registra e Genera Ricevuta PDF</button>
                         </form>
