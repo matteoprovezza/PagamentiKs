@@ -58,7 +58,7 @@ class Resoconti730Page {
         if (totalRevenueCurrentEl) {
             const currentYear = new Date().getFullYear();
             const revenueCurrent = this.payments
-                .filter(p => new Date(p.data).getFullYear() === currentYear)
+                .filter(p => new Date(p.data).getFullYear() === currentYear && p.detraibile !== false)
                 .reduce((sum, p) => sum + (p.importo || 0), 0);
             totalRevenueCurrentEl.textContent = `€ ${revenueCurrent.toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
         }
@@ -66,7 +66,7 @@ class Resoconti730Page {
         if (totalRevenuePreviousEl) {
             const previousYear = new Date().getFullYear() - 1;
             const revenuePrevious = this.payments
-                .filter(p => new Date(p.data).getFullYear() === previousYear)
+                .filter(p => new Date(p.data).getFullYear() === previousYear && p.detraibile !== false)
                 .reduce((sum, p) => sum + (p.importo || 0), 0);
             totalRevenuePreviousEl.textContent = `€ ${revenuePrevious.toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
         }
@@ -86,10 +86,10 @@ class Resoconti730Page {
             // Calculate total payments for this athlete
             const athletePayments = this.payments.filter(p => p.atletaId === athlete.id);
             const currentYearTotal = athletePayments
-                .filter(p => new Date(p.data).getFullYear() === new Date().getFullYear())
+                .filter(p => new Date(p.data).getFullYear() === new Date().getFullYear() && p.detraibile !== false)
                 .reduce((sum, p) => sum + (p.importo || 0), 0);
             const previousYearTotal = athletePayments
-                .filter(p => new Date(p.data).getFullYear() === new Date().getFullYear() - 1)
+                .filter(p => new Date(p.data).getFullYear() === new Date().getFullYear() - 1 && p.detraibile !== false)
                 .reduce((sum, p) => sum + (p.importo || 0), 0);
             
             row.innerHTML = `
@@ -509,14 +509,14 @@ function removeModal(modal) {
 function calculateCurrentYearTotal(payments) {
     const currentYear = new Date().getFullYear();
     return payments
-        .filter(p => new Date(p.data).getFullYear() === currentYear)
+        .filter(p => new Date(p.data).getFullYear() === currentYear && p.detraibile !== false)
         .reduce((sum, p) => sum + (p.importo || 0), 0);
 }
 
 function calculatePreviousYearTotal(payments) {
     const previousYear = new Date().getFullYear() - 1;
     return payments
-        .filter(p => new Date(p.data).getFullYear() === previousYear)
+        .filter(p => new Date(p.data).getFullYear() === previousYear && p.detraibile !== false)
         .reduce((sum, p) => sum + (p.importo || 0), 0);
 }
 

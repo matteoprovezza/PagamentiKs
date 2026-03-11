@@ -45,6 +45,10 @@ public class Pagamento {
     @Column(name = "tipo_pagamento", nullable = false)
     @Schema(description = "Payment type and method", example = "CONTANTI")
     private TipoPagamento tipoPagamento;
+    
+    @Column(name = "detraibile", columnDefinition = "BOOLEAN DEFAULT TRUE", nullable = false)
+    @Schema(description = "Whether payment is deductible for 730 calculations", example = "true")
+    private Boolean detraibile = true;
 
     // Constructors
     public Pagamento() {}
@@ -122,5 +126,13 @@ public class Pagamento {
 
     public void setAtletaId(Long atletaId) {
         this.atletaId = atletaId;
+    }
+    
+    public Boolean getDetraibile() {
+        return detraibile;
+    }
+
+    public void setDetraibile(Boolean detraibile) {
+        this.detraibile = detraibile;
     }
 }

@@ -64,6 +64,12 @@
                                 <label for="date">Data</label>
                                 <input type="date" id="date" name="date" required>
                             </div>
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="detraibile" name="detraibile" checked>
+                                    Detraibile (includi nel resoconto 730)
+                                </label>
+                            </div>
                             <button type="submit" class="btn btn-primary" id="registerAndGenerateReceipt">Registra e Genera Ricevuta PDF</button>
                         </form>
                     </div>
@@ -128,12 +134,13 @@
                                         <th>Importo</th>
                                         <th>Tipologia</th>
                                         <th>Metodo</th>
+                                        <th>Detraibile</th>
                                         <th>Azioni</th>
                                     </tr>
                                 </thead>
                                 <tbody id="payments-table-body">
                                     <tr>
-                                        <td colspan="6" class="loading-row">Caricamento in corso...</td>
+                                        <td colspan="7" class="loading-row">Caricamento in corso...</td>
                                     </tr>
                                 </tbody>
                             </table>

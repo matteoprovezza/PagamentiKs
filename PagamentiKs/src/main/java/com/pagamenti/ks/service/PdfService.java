@@ -203,8 +203,9 @@ public class PdfService {
         document.add(new Paragraph(String.format("Di aver ricevuto per frequentazione al corso di KARATE per l'anno %d il seguente corrispettivo:", anno), normal));
         document.add(Chunk.NEWLINE);
 
-        // Calcolo totale
+        // Calcolo totale solo per pagamenti detraibili
         double totale = pagamenti.stream()
+            .filter(p -> p.getDetraibile() != null && p.getDetraibile())
             .mapToDouble(p -> p.getImporto() != null ? p.getImporto() : 0.0)
             .sum();
 
