@@ -186,7 +186,7 @@ class PagamentiPage {
                         ${payment.tipoPagamento || 'N/D'}
                     </span>
                 </td>
-                <td>${payment.metodoPagamento || 'N/D'}</td>
+                <td>${payment.note || '-'}</td>
                 <td>
                     <span class="status-badge ${payment.detraibile ? 'active' : 'inactive'}">
                         ${payment.detraibile !== false ? 'Sì' : 'No'}
@@ -986,11 +986,12 @@ window.viewAthletePayments = async function(athleteId) {
                                     <thead>
                                         <tr>
                                             <th>Data</th>
+                                            <th>Atleta</th>
                                             <th>Importo</th>
                                             <th>Tipo</th>
-                                            <th>Metodo</th>
                                             <th>Note</th>
-                                            <th>Ricevuta</th>
+                                            <th>Detraibile</th>
+                                            <th>Azioni</th>
                                         </tr>
                                     </thead>
                                     <tbody>

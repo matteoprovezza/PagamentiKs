@@ -50,6 +50,10 @@ public class Pagamento {
     @Schema(description = "Whether payment is deductible for 730 calculations", example = "true")
     private Boolean detraibile = true;
 
+    @Column(name = "note", columnDefinition = "TEXT")
+    @Schema(description = "Payment notes", example = "Pagamento mensile corso avanzato")
+    private String note;
+
     // Constructors
     public Pagamento() {}
 
@@ -134,5 +138,13 @@ public class Pagamento {
 
     public void setDetraibile(Boolean detraibile) {
         this.detraibile = detraibile;
+    }
+    
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
     }
 }
