@@ -189,7 +189,7 @@ class PagamentiPage {
                 <td>${payment.note || '-'}</td>
                 <td>
                     <span class="status-badge ${payment.detraibile ? 'active' : 'inactive'}">
-                        ${payment.detraibile !== false ? 'Sì' : 'No'}
+                        ${payment.detraibile ? 'Sì' : 'No'}
                     </span>
                 </td>
                 <td>
@@ -381,7 +381,7 @@ window.showAddPaymentModal = async function() {
                     </div>
                     <div class="form-group">
                         <label for="detraibile">Detraibile: includi nel resoconto 730</label>
-                        <select id="detraibile" name="detraibile" checked>
+                        <select id="detraibile" name="detraibile">
                             <option value="true">SI</option>
                             <option value="false">NO</option>
                         </select>
@@ -465,9 +465,9 @@ window.editPayment = async function(id) {
                         </div>
                         <div class="form-group">
                             <label for="detraibile">Detraibile: includi nel resoconto 730</label>
-                            <select id="detraibile" name="detraibile" ${payment.detraibile !== false ? '' : 'selected'}>
-                                <option value="true">SI</option>
-                                <option value="false">NO</option>
+                            <select id="detraibile" name="detraibile">
+                                <option value="true" ${payment.detraibile ? 'selected' : ''}>SI</option>
+                                <option value="false" ${!payment.detraibile ? 'selected' : ''}>NO</option>
                             </select>
                         </div>
                         <div class="form-actions">
@@ -672,7 +672,7 @@ window.showQuickPaymentForm = function(athleteId) {
                     </div>
                     <div class="form-group">
                         <label for="modal-quick-detraibile-${athleteId}">Detraibile: includi nel resoconto 730</label>
-                        <select id="modal-quick-detraibile-${athleteId}" name="detraibile" checked>
+                        <select id="modal-quick-detraibile-${athleteId}" name="detraibile">
                             <option value="true">SI</option>
                             <option value="false">NO</option>
                         </select>
@@ -761,7 +761,7 @@ async function handleModalQuickPayment(e, modal, athleteId) {
     const paymentType = typeSelect.value;
     const paymentDate = dateInput.value;
     const note = noteInput.value;
-    const detraibile = detraibileInput.checked;
+    const detraibile = detraibileInput.value === 'true';
     
     if (!amount || amount <= 0) {
         showMessage('Inserisci un importo valido', 'warning');
