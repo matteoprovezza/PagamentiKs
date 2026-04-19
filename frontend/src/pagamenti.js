@@ -200,9 +200,9 @@ class PagamentiPage {
                         <button class="btn btn-sm btn-info" onclick="generateAthleteReceipt(${payment.atleta?.id || payment.atletaId})">
                             Ricevuta
                         </button>
-                        <button class="btn btn-sm btn-danger" onclick="deletePayment(${payment.id})">
+                        ${window.isAdmin() ? `<button class="btn btn-sm btn-danger" onclick="deletePayment(${payment.id})">
                             Elimina
-                        </button>
+                        </button>` : ''}
                     </div>
                 </td>
             `;

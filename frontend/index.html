@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="src/styles.css">
     <script src="src/api.js"></script>
+    <script src="src/auth.js"></script>
     <script src="src/navigation.js"></script>
     <script src="src/dashboard.js"></script>
 </head>
@@ -28,7 +29,19 @@
                         <a href="pagamenti.html">Pagamenti</a>
                     </li>
                     <li>
-                        <a href="dashboard.html">Resoconti 730</a>
+                        <a href="resoconti730.html">Resoconti 730</a>
+                    </li>
+                    <li class="logout-item admin-only">
+                        <button onclick="showCreateUserModal()" class="logout-btn">
+                            <i class="fas fa-user-plus"></i>
+                            Nuovo Utente
+                        </button>
+                    </li>
+                    <li class="logout-item">
+                        <button onclick="logout()" class="logout-btn">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Logout
+                        </button>
                     </li>
                 </ul>
             </nav>
@@ -78,6 +91,47 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Creation Modal -->
+    <div id="createUserModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Crea Nuovo Utente</h2>
+                <button class="close-btn" onclick="closeCreateUserModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="createUserForm">
+                    <div class="form-group">
+                        <label for="user-email">Email</label>
+                        <input type="email" id="user-email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="user-password">Password</label>
+                        <input type="password" id="user-password" name="password" required minlength="6">
+                    </div>
+                    <div class="form-group">
+                        <label for="user-first-name">Nome</label>
+                        <input type="text" id="user-first-name" name="firstName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="user-last-name">Cognome</label>
+                        <input type="text" id="user-last-name" name="lastName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="user-role">Ruolo</label>
+                        <select id="user-role" name="role" required>
+                            <option value="USER">Utente</option>
+                            <option value="ADMIN">Amministratore</option>
+                        </select>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeCreateUserModal()">Annulla</button>
+                        <button type="submit" class="btn btn-primary">Crea Utente</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

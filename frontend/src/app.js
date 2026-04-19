@@ -134,7 +134,7 @@ class KarateManagerApp {
                 <div class="athlete-total" id="total-${athlete.id}">Caricamento...</div>
                 <div class="athlete-actions">
                     <a href="#" class="btn-link" onclick="app.editAthlete(${athlete.id})">Modifica</a>
-                    <a href="#" class="btn-link btn-danger" onclick="app.deleteAthlete(${athlete.id})">Elimina</a>
+                    ${window.isAdmin ? window.isAdmin() : false ? `<a href="#" class="btn-link btn-danger" onclick="app.deleteAthlete(${athlete.id})">Elimina</a>` : ''}
                 </div>
             `;
             

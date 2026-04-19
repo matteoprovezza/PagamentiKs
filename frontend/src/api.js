@@ -16,8 +16,22 @@ class ApiClient {
             ...options,
         };
 
+        // Add authentication header if token exists
+        const token = localStorage.getItem('access_token');
+        if (token) {
+            config.headers['Authorization'] = `Bearer ${token}`;
+        }
+
         try {
             const response = await fetch(url, config);
+            
+            // Handle 401 Unauthorized - token expired
+            if (response.status === 401) {
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('refresh_token');
+                window.location.href = 'login.html';
+                throw new Error('Sessione scaduta. Effettua nuovamente il login.');
+            }
             
             if (!response.ok) {
                 const error = new Error(`HTTP error! status: ${response.status}`);

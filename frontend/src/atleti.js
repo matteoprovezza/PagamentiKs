@@ -82,9 +82,9 @@ class AthletiPage {
                                 onclick="toggleAthleteStatus(${athlete.id})">
                             ${athlete.attivo ? 'Disattiva' : 'Attiva'}
                         </button>
-                        <button class="btn btn-sm btn-danger" onclick="deleteAthlete(${athlete.id})">
+                        ${window.isAdmin() ? `<button class="btn btn-sm btn-danger" onclick="deleteAthlete(${athlete.id})">
                             Elimina
-                        </button>
+                        </button>` : ''}
                     </div>
                 </td>
             `;
@@ -259,9 +259,9 @@ class AthletiPage {
                         <i class="fas ${athlete.attivo ? 'fa-ban' : 'fa-check'}"></i>
                         ${athlete.attivo ? 'Disattiva' : 'Attiva'}
                     </button>
-                    <button class="btn btn-danger" onclick="deleteAthlete(${athlete.id})">
+                    ${window.isAdmin() ? `<button class="btn btn-danger" onclick="deleteAthlete(${athlete.id})">
                         <i class="fas fa-trash"></i> Elimina
-                    </button>
+                    </button>` : ''}
                 </div>
             </div>
         `;

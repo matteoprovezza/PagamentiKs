@@ -13,8 +13,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -143,6 +143,7 @@ public class PagamentoController {
     
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete a payment")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         try {
             pagamentoService.deleteById(id);

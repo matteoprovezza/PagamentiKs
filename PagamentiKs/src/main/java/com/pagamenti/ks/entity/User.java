@@ -1,5 +1,6 @@
 package com.pagamenti.ks.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.pagamenti.ks.enums.Role;
 import jakarta.persistence.*;
 

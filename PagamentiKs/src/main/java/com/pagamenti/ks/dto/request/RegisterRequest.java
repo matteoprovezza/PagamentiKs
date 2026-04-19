@@ -1,7 +1,9 @@
 package com.pagamenti.ks.dto.request;
 
+import com.pagamenti.ks.enums.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public class RegisterRequest {
@@ -20,14 +22,18 @@ public class RegisterRequest {
     @Size(min = 8, message = "La password deve contenere almeno 8 caratteri")
     private String password;
 
+    @NotNull(message = "Il ruolo è obbligatorio")
+    private Role role;
+
     // Constructors
     public RegisterRequest() {}
 
-    public RegisterRequest(String firstName, String lastName, String email, String password) {
+    public RegisterRequest(String firstName, String lastName, String email, String password, Role role) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.password = password;
+        this.role = role;
     }
 
     // Getters and Setters
@@ -61,5 +67,13 @@ public class RegisterRequest {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
     }
 }
